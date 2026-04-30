@@ -1,0 +1,77 @@
+.kn { display: grid; gap: 1.2rem; }
+.kn__head h1 {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+}
+.kn__head p { color: var(--text-dim); font-style: italic; margin-top: 0.3rem; }
+
+.kn__panel {
+  background: linear-gradient(180deg, var(--navy-700), var(--navy-800));
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: var(--radius-lg);
+  padding: 1.2rem;
+  display: grid;
+  gap: 1rem;
+  box-shadow: var(--shadow-md), var(--inner-line);
+}
+
+.kn__progress { display: grid; gap: 0.4rem; }
+.kn__row {
+  display: flex; justify-content: space-between;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+}
+
+.kn__cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+.kn__sk { color: var(--text); font-size: 0.95rem; }
+
+.kn__sub {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: 1.2rem;
+  letter-spacing: 0.1em;
+  margin-top: 0.4rem;
+}
+.kn__lead { color: var(--text-dim); font-style: italic; margin-bottom: 0.4rem; }
+
+.kn__grid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 700px) { .kn__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1100px) { .kn__grid { grid-template-columns: repeat(3, 1fr); } }
+
+.boon {
+  background: linear-gradient(180deg, var(--navy-700), var(--navy-800));
+  border: 1px solid rgba(212,175,55,0.18);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem 0.95rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.boon--owned { border-color: rgba(212,175,55,0.5); box-shadow: var(--gold-glow); }
+
+.boon__head { display: flex; align-items: baseline; justify-content: space-between; }
+.boon__title { font-family: var(--font-display); color: var(--gold-300); font-size: 1rem; }
+.boon__owned { font-size: 0.78rem; color: var(--text-dim); letter-spacing: 0.06em; }
+
+.boon__desc { font-size: 0.88rem; }
+.boon__row {
+  margin-top: 0.3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.boon__cost { color: var(--gold-300); font-weight: 700; }
+.boon__actions { display: flex; gap: 0.4rem; }

@@ -1,0 +1,51 @@
+.title {
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  align-items: center;
+  justify-items: center;
+  padding: 1.2rem 1rem 1.5rem;
+  gap: 1rem;
+  text-align: center;
+  min-height: 100vh;
+}
+
+.title__header { padding-top: 1.4rem; }
+
+.title__h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 8vw, 4rem);
+  background: linear-gradient(180deg, var(--gold-300), var(--gold-700));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 24px rgba(212,175,55,0.25);
+  letter-spacing: 0.06em;
+}
+
+.title__sub {
+  margin-top: 0.5rem;
+  color: var(--text-dim);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.title__art {
+  align-self: center;
+}
+
+.title__cta { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; }
+
+.title__footer {
+  font-style: italic;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .title { padding: 2rem; gap: 1.6rem; }
+}

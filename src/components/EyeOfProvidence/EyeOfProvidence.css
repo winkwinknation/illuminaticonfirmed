@@ -1,0 +1,29 @@
+.eye {
+  display: inline-block;
+  filter: drop-shadow(0 0 18px rgba(212,175,55,0.45));
+}
+
+.eye--animated .eye__rays {
+  transform-origin: 100px 98px;
+  animation: eye-rays-pulse 4s ease-in-out infinite;
+}
+.eye--animated .eye__rays-spokes {
+  transform-origin: 100px 98px;
+  animation: eye-rays-spin 60s linear infinite;
+}
+.eye--animated .eye__pupil {
+  transform-origin: 100px 120px;
+  animation: eye-pupil-blink 6s ease-in-out infinite;
+}
+
+@keyframes eye-rays-pulse {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+@keyframes eye-rays-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes eye-pupil-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.05); }
+}

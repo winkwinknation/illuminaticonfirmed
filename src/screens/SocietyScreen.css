@@ -1,0 +1,65 @@
+.society { display: grid; gap: 1.2rem; }
+.society__head h1 {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+}
+.society__head p { color: var(--text-dim); font-style: italic; margin-top: 0.3rem; }
+
+.society__grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 600px) { .society__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1100px) { .society__grid { grid-template-columns: repeat(3, 1fr); } }
+
+.mission {
+  background: linear-gradient(180deg, var(--navy-700), var(--navy-800));
+  border: 1px solid rgba(212,175,55,0.18);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem 1rem;
+  display: grid;
+  gap: 0.55rem;
+  box-shadow: var(--shadow-sm);
+  border-left-width: 3px;
+}
+.mission--barter { border-left-color: var(--money); }
+.mission--rumor { border-left-color: var(--knowledge); }
+.mission--danger { border-left-color: var(--hp); }
+
+.mission__head { display: flex; align-items: center; gap: 0.6rem; justify-content: space-between; }
+.mission__title { font-family: var(--font-display); color: var(--gold-300); font-size: 1.05rem; }
+.mission__tag {
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.mission__tag--barter { color: var(--money); }
+.mission__tag--rumor { color: var(--knowledge); }
+.mission__tag--danger { color: var(--hp); }
+
+.mission__desc { color: var(--text-dim); font-size: 0.9rem; }
+
+.mission__cost, .mission__rew {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.mission__cost li { color: var(--danger); }
+.mission__rew li { color: var(--gold-300); }
+
+.mission__cd { display: grid; gap: 0.25rem; }
+.mission__cd-text {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.mission__flavor { color: var(--text-dim); font-style: italic; font-size: 0.78rem; }

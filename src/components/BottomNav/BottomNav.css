@@ -1,0 +1,80 @@
+.nav {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: linear-gradient(180deg, var(--navy-800), var(--navy-900));
+  border-top: 1px solid rgba(212,175,55,0.25);
+  padding: 0.4rem 0.4rem max(0.4rem, env(safe-area-inset-bottom));
+  z-index: 9;
+}
+
+.nav__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.3rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-dim);
+  transition: color 120ms var(--easing), background 120ms var(--easing);
+  gap: 2px;
+}
+.nav__item:hover { color: var(--gold-300); }
+.nav__item--active {
+  color: var(--gold-300);
+  background: rgba(212,175,55,0.08);
+  box-shadow: inset 0 -2px 0 var(--gold-500);
+}
+
+.nav__icon { font-size: 1.15rem; line-height: 1; }
+.nav__label { font-size: 0.66rem; letter-spacing: 0.04em; text-transform: uppercase; }
+@media (min-width: 420px) {
+  .nav__icon { font-size: 1.25rem; }
+  .nav__label { font-size: 0.72rem; }
+}
+
+.nav__badge {
+  position: absolute;
+  top: 6px;
+  right: calc(50% - 22px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-300);
+  box-shadow: 0 0 6px var(--gold-500);
+  animation: badge-pulse 1.6s ease-in-out infinite;
+}
+@keyframes badge-pulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+@media (min-width: 768px) {
+  .nav {
+    position: sticky;
+    top: 0;
+    bottom: auto;
+    grid-template-columns: 1fr;
+    grid-auto-rows: min-content;
+    border-top: none;
+    border-right: 1px solid rgba(212,175,55,0.25);
+    padding: 1rem 0.5rem;
+    gap: 0.4rem;
+    height: 100%;
+    align-content: start;
+  }
+  .nav__item {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.7rem;
+    padding: 0.7rem 0.9rem;
+  }
+  .nav__item--active {
+    box-shadow: inset 3px 0 0 var(--gold-500);
+  }
+  .nav__icon { font-size: 1.1rem; }
+  .nav__label { font-size: 0.85rem; }
+  .nav__badge { top: 50%; transform: translateY(-50%); right: 12px; }
+}

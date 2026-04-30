@@ -1,0 +1,64 @@
+.shop { display: grid; gap: 1.4rem; }
+.shop__head h1 {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+}
+.shop__head p { color: var(--text-dim); font-style: italic; margin-top: 0.3rem; }
+
+.shop__cat-title {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: 1.05rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(212,175,55,0.25);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.7rem;
+}
+
+.shop__grid {
+  display: grid;
+  gap: 0.7rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 700px) { .shop__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1100px) { .shop__grid { grid-template-columns: repeat(3, 1fr); } }
+
+.up {
+  background: linear-gradient(180deg, var(--navy-700), var(--navy-800));
+  border: 1px solid rgba(212,175,55,0.18);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem 0.95rem;
+  display: grid;
+  gap: 0.45rem;
+  box-shadow: var(--shadow-sm);
+}
+.up__head { display: flex; align-items: baseline; justify-content: space-between; }
+.up__title { font-family: var(--font-display); color: var(--gold-300); font-size: 1rem; }
+.up__owned {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+}
+.up__desc { font-size: 0.88rem; }
+.up__flavor { font-size: 0.78rem; font-style: italic; color: var(--text-dim); }
+.up__row {
+  margin-top: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.up__cost {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.up__money { color: var(--money); }
+.up__faith { color: var(--faith); }
+.up__know { color: var(--knowledge); }
