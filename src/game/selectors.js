@@ -1,12 +1,13 @@
 import { BOONS_BY_ID, boonCostAt } from '../data/boons';
 import { MEMBERS, MEMBERS_BY_ID } from '../data/members';
-import { MISSIONS_BY_ID } from '../data/missions';
-import { UPGRADES_BY_ID } from '../data/upgrades';
+import { MISSIONS, MISSIONS_BY_ID } from '../data/missions';
+import { UPGRADES, UPGRADES_BY_ID } from '../data/upgrades';
 import {
   BASE_HP_REGEN,
   BASE_MAX_HP,
   MEMBER_COST_GROWTH,
   OFFLINE_CAP_MS,
+  ORDER_UNLOCK_KNOWLEDGE_COST,
   SACRIFICE_HP_COST,
 } from './constants';
 import {
@@ -81,6 +82,11 @@ const boonMult = (state, kinds) => {
 
 const memberKindMult = (state, kinds) => {
   let mult = 1;
+  // The Patriarch (multAll) lifts all three resource kinds equally.
+  const allBonus = sumMemberEffect(state, 'multAll');
+  if (allBonus > 0 && (kinds.faith || kinds.money || kinds.knowledge)) {
+    mult *= 1 + allBonus;
+  }
   if (kinds.faith) mult *= 1 + sumMemberEffect(state, 'multAllFaith');
   if (kinds.money) mult *= 1 + sumMemberEffect(state, 'multAllMoney');
   if (kinds.knowledge) mult *= 1 + sumMemberEffect(state, 'multAllKnowledge');
@@ -96,6 +102,12 @@ export const maxHp = (state) => {
     const owned = boonOwned(state, b.id);
     if (owned && b.effect.kind === 'addMaxHpPct') {
       pctMul *= 1 + b.effect.perLevel * owned;
+    }
+  }
+  for (const u of Object.values(UPGRADES_BY_ID)) {
+    const owned = upgradeOwned(state, u.id);
+    if (owned && u.effect.kind === 'addMaxHpPct') {
+      pctMul *= 1 + u.effect.perLevel * owned;
     }
   }
   return Math.floor((BASE_MAX_HP + flat) * pctMul);
@@ -205,19 +217,23 @@ export const missionRemainingMs = (state, mission, now = Date.now()) => {
 
 // ---------- Passive idle ----------
 
+const passiveAll = (state) =>
+  sumUpgradeEffect(state, (u) => u.effect.kind === 'addPassiveAll', (u, n) => u.effect.perLevel * n);
+
 export const passiveFaithPerSec = (state) => {
   const base = sumUpgradeEffect(state, (u) => u.effect.kind === 'addPassiveFaith', (u, n) => u.effect.perLevel * n);
-  return base * boonMult(state, { faith: true }) * memberKindMult(state, { faith: true });
+  return (base + passiveAll(state)) * boonMult(state, { faith: true }) * memberKindMult(state, { faith: true });
 };
 
 export const passiveMoneyPerSec = (state) => {
   const base = sumUpgradeEffect(state, (u) => u.effect.kind === 'addPassiveMoney', (u, n) => u.effect.perLevel * n);
-  return base * boonMult(state, { money: true }) * memberKindMult(state, { money: true });
+  return (base + passiveAll(state)) * boonMult(state, { money: true }) * memberKindMult(state, { money: true });
 };
 
 export const passiveKnowledgePerSec = (state) => {
-  const base = sumUpgradeEffect(state, (u) => u.effect.kind === 'addPassiveKnowledge', (u, n) => u.effect.perLevel * n);
-  return base * boonMult(state, { knowledge: true }) * memberKindMult(state, { knowledge: true });
+  const fromUpgrades = sumUpgradeEffect(state, (u) => u.effect.kind === 'addPassiveKnowledge', (u, n) => u.effect.perLevel * n);
+  const fromMembers = sumMemberEffect(state, 'addPassiveKnowledge');
+  return (fromUpgrades + fromMembers + passiveAll(state)) * boonMult(state, { knowledge: true }) * memberKindMult(state, { knowledge: true });
 };
 
 // ---------- Costs ----------
@@ -238,6 +254,7 @@ export const upgradeCost = (state, upgrade) => {
 };
 
 export const canAffordUpgrade = (state, upgrade) => {
+  if (!isUnlocked(state, upgrade)) return false;
   const cost = upgradeCost(state, upgrade);
   if (cost.money && state.money < cost.money) return false;
   if (cost.faith && state.faith < cost.faith) return false;
@@ -257,6 +274,8 @@ export const memberCost = (state, member) => {
 };
 
 export const canAffordMember = (state, member) => {
+  if (!state.orderUnlocked) return false;
+  if (!isUnlocked(state, member)) return false;
   const cost = memberCost(state, member);
   if (cost.money && state.money < cost.money) return false;
   if (cost.faith && state.faith < cost.faith) return false;
@@ -267,9 +286,124 @@ export const canAffordMember = (state, member) => {
 };
 
 export const canAffordMission = (state, mission) => {
+  if (!isUnlocked(state, mission)) return false;
   if (mission.cost.faith && state.faith < mission.cost.faith) return false;
   return true;
 };
+
+// ---------- Unlocks ----------
+
+const upgradeMap = UPGRADES_BY_ID;
+const memberMap = MEMBERS_BY_ID;
+
+export const checkCondition = (state, cond) => {
+  switch (cond.kind) {
+    case 'always':
+      return true;
+    case 'totalSacrifices':
+      return (state.totalSacrifices || 0) >= cond.n;
+    case 'totalMissions':
+      return (state.totalMissions || 0) >= cond.n;
+    case 'totalMoneyEarned':
+      return (state.totalMoneyEarned || 0) >= cond.n;
+    case 'totalFaithEarned':
+      return (state.totalFaithEarned || 0) >= cond.n;
+    case 'totalKnowledgeEarned':
+      return (state.totalKnowledgeEarned || 0) >= cond.n;
+    case 'knowledge':
+      return (state.knowledge || 0) >= cond.n;
+    case 'upgradeOwned':
+      return upgradeOwned(state, cond.id) >= (cond.n || 1);
+    case 'memberOwned':
+      return memberOwned(state, cond.id) >= (cond.n || 1);
+    case 'prestigeLevel':
+      return (state.prestigeLevel || 0) >= cond.n;
+    case 'orderUnlocked':
+      return !!state.orderUnlocked;
+    default:
+      return true;
+  }
+};
+
+const conditionLabel = (cond) => {
+  switch (cond.kind) {
+    case 'totalSacrifices':
+      return `${cond.n} sacrifices made`;
+    case 'totalMissions':
+      return `${cond.n} missions completed`;
+    case 'totalMoneyEarned':
+      return `${cond.n} money earned (lifetime)`;
+    case 'totalFaithEarned':
+      return `${cond.n} faith earned (lifetime)`;
+    case 'totalKnowledgeEarned':
+      return `${cond.n} knowledge earned (lifetime)`;
+    case 'knowledge':
+      return `${cond.n} knowledge on hand`;
+    case 'upgradeOwned': {
+      const u = upgradeMap[cond.id];
+      return u ? `${cond.n || 1}× ${u.name}` : `Own ${cond.id}`;
+    }
+    case 'memberOwned': {
+      const m = memberMap[cond.id];
+      return m ? `${cond.n || 1}× ${m.name}` : `Own ${cond.id}`;
+    }
+    case 'prestigeLevel':
+      return `Ascend ${cond.n} time${cond.n === 1 ? '' : 's'}`;
+    case 'orderUnlocked':
+      return 'Inaugurate the Order';
+    default:
+      return '';
+  }
+};
+
+export const isUnlocked = (state, item) => {
+  const conds = item?.unlock;
+  if (!conds || conds.length === 0) return true;
+  return conds.every((c) => checkCondition(state, c));
+};
+
+export const unlockHints = (state, item) => {
+  const conds = item?.unlock;
+  if (!conds) return [];
+  return conds
+    .filter((c) => !checkCondition(state, c))
+    .map((c) => conditionLabel(c))
+    .filter(Boolean);
+};
+
+// Compares a mission/upgrade/member against a state to decide ordering.
+const byTier = (a, b) => (a.tier || 99) - (b.tier || 99);
+
+const nextLockedFrom = (state, items) => {
+  const locked = items.filter((it) => !isUnlocked(state, it)).sort(byTier);
+  return locked[0] || null;
+};
+
+export const visibleMissions = (state) => MISSIONS.filter((m) => isUnlocked(state, m)).slice().sort(byTier);
+export const nextLockedMission = (state) => nextLockedFrom(state, MISSIONS);
+
+export const visibleUpgrades = (state) => UPGRADES.filter((u) => isUnlocked(state, u)).slice().sort(byTier);
+export const nextLockedUpgrade = (state) => nextLockedFrom(state, UPGRADES);
+export const nextLockedUpgradeInCategory = (state, category) =>
+  nextLockedFrom(state, UPGRADES.filter((u) => u.category === category));
+
+const memberWithOrderGate = (state, m) => {
+  // Inherit the global Order knowledge gate so individual members don't have
+  // to repeat it. Once orderUnlocked is true, only the per-member rules count.
+  if (!state.orderUnlocked) return false;
+  return isUnlocked(state, m);
+};
+
+export const visibleMembers = (state) =>
+  MEMBERS.filter((m) => memberWithOrderGate(state, m)).slice().sort(byTier);
+export const nextLockedMember = (state) => {
+  if (!state.orderUnlocked) return null;
+  return nextLockedFrom(state, MEMBERS);
+};
+
+export const orderUnlockCost = () => ORDER_UNLOCK_KNOWLEDGE_COST;
+export const canUnlockOrder = (state) =>
+  !state.orderUnlocked && (state.knowledge || 0) >= orderUnlockCost();
 
 // ---------- Prestige ----------
 

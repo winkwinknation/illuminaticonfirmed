@@ -1,5 +1,19 @@
 // Missions now run for `durationMs` after start; rewards are paid out on completion.
 // Costs (faith, hp) are deducted at start.
+//
+// `tier` controls display order and what counts as the "next" locked teaser.
+// `unlock` is a list of conditions interpreted by selectors.isUnlocked.
+//   { kind: 'always' }                          — no requirement (omit to imply this)
+//   { kind: 'totalSacrifices', n }
+//   { kind: 'totalMissions', n }
+//   { kind: 'totalMoneyEarned', n }
+//   { kind: 'totalFaithEarned', n }
+//   { kind: 'totalKnowledgeEarned', n }
+//   { kind: 'knowledge', n }                    — current knowledge balance
+//   { kind: 'upgradeOwned', id, n }
+//   { kind: 'memberOwned', id, n }
+//   { kind: 'prestigeLevel', n }
+//   { kind: 'orderUnlocked' }
 
 export const MISSIONS = [
   {
@@ -11,6 +25,7 @@ export const MISSIONS = [
     reward: { money: 8 },
     durationMs: 3000,
     flavor: 'Coins from the careless.',
+    tier: 1,
   },
   {
     id: 'rumor_tavern',
@@ -21,6 +36,8 @@ export const MISSIONS = [
     reward: { knowledge: 1 },
     durationMs: 5000,
     flavor: 'Wine loosens what locks could not.',
+    tier: 2,
+    unlock: [{ kind: 'totalSacrifices', n: 3 }],
   },
   {
     id: 'barter_caravan',
@@ -31,6 +48,8 @@ export const MISSIONS = [
     reward: { money: 35 },
     durationMs: 6000,
     flavor: null,
+    tier: 3,
+    unlock: [{ kind: 'totalMoneyEarned', n: 100 }],
   },
   {
     id: 'rumor_court',
@@ -41,6 +60,20 @@ export const MISSIONS = [
     reward: { knowledge: 4 },
     durationMs: 9000,
     flavor: null,
+    tier: 4,
+    unlock: [{ kind: 'totalMissions', n: 8 }],
+  },
+  {
+    id: 'barter_postal',
+    category: 'barter',
+    name: 'Skim the Postal Routes',
+    desc: 'A copper from each parcel; nobody counts what was never theirs.',
+    cost: { faith: 12 },
+    reward: { money: 95, knowledge: 1 },
+    durationMs: 8000,
+    flavor: 'Letters arrive late, the order arrives early.',
+    tier: 4,
+    unlock: [{ kind: 'totalMoneyEarned', n: 350 }, { kind: 'upgradeOwned', id: 'barter_1', n: 2 }],
   },
   {
     id: 'danger_heist',
@@ -51,6 +84,20 @@ export const MISSIONS = [
     reward: { money: 150 },
     durationMs: 8000,
     flavor: 'Doors are suggestions.',
+    tier: 5,
+    unlock: [{ kind: 'totalMoneyEarned', n: 800 }, { kind: 'upgradeOwned', id: 'sac_1', n: 1 }],
+  },
+  {
+    id: 'rumor_confessional',
+    category: 'rumor',
+    name: 'Sit on the Other Side',
+    desc: 'A confessor with a thumb on the latch hears more than he gives.',
+    cost: { faith: 14, hpFraction: 0.04 },
+    reward: { knowledge: 7 },
+    durationMs: 10000,
+    flavor: 'Forgive them, for they will say it twice.',
+    tier: 5,
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 25 }],
   },
   {
     id: 'danger_extort',
@@ -61,6 +108,8 @@ export const MISSIONS = [
     reward: { money: 320, knowledge: 1 },
     durationMs: 12000,
     flavor: null,
+    tier: 6,
+    unlock: [{ kind: 'totalMoneyEarned', n: 3000 }],
   },
   {
     id: 'rumor_archive',
@@ -71,6 +120,8 @@ export const MISSIONS = [
     reward: { knowledge: 12, money: 50 },
     durationMs: 15000,
     flavor: null,
+    tier: 7,
+    unlock: [{ kind: 'totalMissions', n: 25 }, { kind: 'totalKnowledgeEarned', n: 60 }],
   },
   {
     id: 'barter_treasury',
@@ -81,6 +132,32 @@ export const MISSIONS = [
     reward: { money: 800 },
     durationMs: 14000,
     flavor: 'Friction warms the hands of those who collect it.',
+    tier: 8,
+    unlock: [{ kind: 'totalMoneyEarned', n: 15000 }],
+  },
+  {
+    id: 'danger_treaty',
+    category: 'danger',
+    name: 'Forge a Treaty',
+    desc: 'Two seals, one author, three war profits.',
+    cost: { faith: 60, hpFraction: 0.20 },
+    reward: { money: 1800, knowledge: 5 },
+    durationMs: 22000,
+    flavor: 'Peace, written in our hand, costs more than war.',
+    tier: 9,
+    unlock: [{ kind: 'totalMoneyEarned', n: 40000 }, { kind: 'memberOwned', id: 'enforcer', n: 1 }],
+  },
+  {
+    id: 'rumor_census',
+    category: 'rumor',
+    name: 'Burn the Census',
+    desc: 'Nothing is freer than the man no clerk has heard of.',
+    cost: { faith: 90, hpFraction: 0.12 },
+    reward: { knowledge: 40, money: 200 },
+    durationMs: 25000,
+    flavor: null,
+    tier: 9,
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 250 }],
   },
 ];
 

@@ -10,6 +10,31 @@ const migrations = {
     delete state.missionCooldowns;
     return { ...blob, saveVersion: 2, state };
   },
+  2: (blob) => {
+    // v2 → v3: add unlock + tutorial state.
+    //   - totalKnowledgeEarned: lifetime knowledge counter (best estimate from current balance).
+    //   - orderUnlocked: legacy saves with any owned member already had Order, so grant it free.
+    //   - tutorialDone: skip tutorial for returning players.
+    const state = { ...blob.state };
+    if (state.totalKnowledgeEarned == null) {
+      state.totalKnowledgeEarned = Math.max(state.knowledge || 0, 0);
+    }
+    if (state.orderUnlocked == null) {
+      const hasMembers = state.members && Object.values(state.members).some((n) => n > 0);
+      state.orderUnlocked = !!hasMembers;
+    }
+    if (state.tutorialDone == null) state.tutorialDone = true;
+    return { ...blob, saveVersion: 3, state };
+  },
+  3: (blob) => {
+    // v3 → v4: tutorialDone (boolean) replaced by tutorialStep (int with 99 = done).
+    const state = { ...blob.state };
+    if (state.tutorialStep == null) {
+      state.tutorialStep = state.tutorialDone ? 99 : 0;
+    }
+    delete state.tutorialDone;
+    return { ...blob, saveVersion: 4, state };
+  },
 };
 
 export const wrapSave = (state, now = Date.now()) => ({

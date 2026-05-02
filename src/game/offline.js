@@ -139,6 +139,7 @@ export const applyActiveMemberWork = (state, work, capHp) => {
     knowledge: state.knowledge + work.missionKnowledge,
     totalFaithEarned: state.totalFaithEarned + work.faithFromSacs + Math.max(0, work.missionFaithReward),
     totalMoneyEarned: state.totalMoneyEarned + work.missionMoney,
+    totalKnowledgeEarned: (state.totalKnowledgeEarned || 0) + work.missionKnowledge,
     totalSacrifices: state.totalSacrifices + work.sacrifices,
     totalMissions: state.totalMissions + work.missionRuns,
   };

@@ -5,6 +5,7 @@ import { Button } from '../components/Button/Button';
 import { Modal } from '../components/Modal';
 import { formatDuration, formatNumber } from '../components/Number';
 import { StatusBar } from '../components/StatusBar/StatusBar';
+import { Tutorial } from '../components/Tutorial';
 import { GameProvider, useGame } from '../context/GameContext';
 import { useSaves } from '../context/SaveContext';
 import { OFFLINE_NOTIFY_MIN_MS } from '../game/constants';
@@ -117,6 +118,7 @@ const InnerShell = ({ slotId }) => {
       </main>
       <BottomNav />
       <OfflineToast />
+      <Tutorial />
     </div>
   );
 };

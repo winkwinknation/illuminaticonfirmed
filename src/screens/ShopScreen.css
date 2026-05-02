@@ -62,3 +62,15 @@
 .up__money { color: var(--money); }
 .up__faith { color: var(--faith); }
 .up__know { color: var(--knowledge); }
+
+.up--locked {
+  border-style: dashed;
+  opacity: 0.85;
+}
+.up--locked .up__title { color: var(--text-dim); }
+.up__lock-list {
+  font-size: 0.82rem;
+  color: var(--gold-300);
+  display: grid;
+  gap: 0.2rem;
+}

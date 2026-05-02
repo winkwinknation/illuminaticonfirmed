@@ -1,4 +1,4 @@
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 4;
 
 export const TICK_MS = 100;
 export const AUTOSAVE_MS = 3000;
@@ -29,3 +29,21 @@ export const REVEAL_BOON_BASE_COST = 2;
 export const REVEAL_BOON_GROWTH = 2;
 
 export const AUTOMATION_TICK_MS = 500;
+
+// Tutorial step ids. 99 == finished/skipped.
+export const TUTORIAL = {
+  WELCOME: 0,
+  SACRIFICE: 1,
+  GO_SOCIETY: 2,
+  START_MISSION: 3,
+  GO_SHOP: 4,
+  BUY_UPGRADE: 5,
+  CLOSING: 6,
+  DONE: 99,
+};
+
+// One-time knowledge cost to inaugurate the Order tab.
+// Sized as a real milestone — the player should have spent meaningful time
+// running rumor missions and probably bought a couple of speech upgrades by
+// the time they can afford it.
+export const ORDER_UNLOCK_KNOWLEDGE_COST = 100;

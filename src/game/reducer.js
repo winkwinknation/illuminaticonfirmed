@@ -4,6 +4,7 @@ import {
   AUTO_FIRE,
   BUY_BOON,
   BUY_UPGRADE,
+  COMPLETE_TUTORIAL,
   LOAD_GAME,
   PRESTIGE,
   RECRUIT_MEMBER,
@@ -12,11 +13,14 @@ import {
   REVEAL_BOON,
   SACRIFICE,
   SACRIFICE_MEMBER,
+  SET_TUTORIAL_STEP,
   STAMP_SAVED,
   START_MISSION,
   TICK,
   UNLOCK_LORE,
+  UNLOCK_ORDER,
 } from './actions';
+import { ORDER_UNLOCK_KNOWLEDGE_COST, TUTORIAL } from './constants';
 import { clamp, revealBoonCost } from './formulas';
 import { makeNewGame, makeNewGameWithBoons } from './initialState';
 import {
@@ -81,6 +85,7 @@ const applyTimeDelta = (state, dtMs) => {
     knowledge: state.knowledge + dKnow,
     totalFaithEarned: state.totalFaithEarned + dFaith,
     totalMoneyEarned: state.totalMoneyEarned + dMoney,
+    totalKnowledgeEarned: (state.totalKnowledgeEarned || 0) + dKnow,
     playtimeMs: state.playtimeMs + dtMs,
   };
 };
@@ -119,6 +124,7 @@ const resolveDueMissions = (state, now = Date.now()) => {
       knowledge: next.knowledge + knowGain,
       totalMoneyEarned: next.totalMoneyEarned + moneyGain,
       totalFaithEarned: next.totalFaithEarned + faithGain,
+      totalKnowledgeEarned: (next.totalKnowledgeEarned || 0) + knowGain,
     };
     totalMissions += 1;
     if (!changed) { nextRunning = { ...running }; changed = true; }
@@ -134,6 +140,7 @@ const startMission = (state, mission) => {
   const hpCost = mission.cost.hpFraction ? Math.ceil(state.hp * mission.cost.hpFraction) : 0;
   if (hpCost && state.hp <= hpCost) return state;
   const duration = missionDurationMs(state, mission);
+  const nextStep = state.tutorialStep === TUTORIAL.START_MISSION ? TUTORIAL.GO_SHOP : state.tutorialStep;
   return {
     ...state,
     hp: Math.max(0, state.hp - hpCost),
@@ -142,6 +149,7 @@ const startMission = (state, mission) => {
       ...(state.runningMissions || {}),
       [mission.id]: { startedAt: Date.now(), endsAt: Date.now() + duration },
     },
+    tutorialStep: nextStep,
   };
 };
 
@@ -198,12 +206,14 @@ export const reducer = (state, action) => {
       const hpCost = sacrificeHpCost(state);
       if (state.hp < hpCost) return state;
       const gain = sacrificeFaithGain(state);
+      const nextStep = state.tutorialStep === TUTORIAL.SACRIFICE ? TUTORIAL.GO_SOCIETY : state.tutorialStep;
       return {
         ...state,
         hp: Math.max(0, state.hp - hpCost),
         faith: state.faith + gain,
         totalFaithEarned: state.totalFaithEarned + gain,
         totalSacrifices: state.totalSacrifices + 1,
+        tutorialStep: nextStep,
       };
     }
 
@@ -232,10 +242,12 @@ export const reducer = (state, action) => {
       const owned = state.upgrades[upgrade.id] || 0;
       const next = subtractCost(state, cost);
       const cappedHp = Math.min(next.hp, maxHp({ ...next, upgrades: { ...next.upgrades, [upgrade.id]: owned + 1 } }));
+      const nextStep = state.tutorialStep === TUTORIAL.BUY_UPGRADE ? TUTORIAL.CLOSING : state.tutorialStep;
       return {
         ...next,
         hp: cappedHp,
         upgrades: { ...next.upgrades, [upgrade.id]: owned + 1 },
+        tutorialStep: nextStep,
       };
     }
 
@@ -275,6 +287,8 @@ export const reducer = (state, action) => {
         unlockedLore: state.unlockedLore,
         createdAt: state.createdAt,
         playtimeMs: state.playtimeMs,
+        orderUnlocked: state.orderUnlocked,
+        tutorialStep: state.tutorialStep,
       };
       const fresh = makeNewGameWithBoons(carryOver);
       return {
@@ -316,6 +330,30 @@ export const reducer = (state, action) => {
 
     case UNLOCK_LORE: {
       return { ...state, unlockedLore: { ...state.unlockedLore, [action.id]: true } };
+    }
+
+    case UNLOCK_ORDER: {
+      if (state.orderUnlocked) return state;
+      if ((state.knowledge || 0) < ORDER_UNLOCK_KNOWLEDGE_COST) return state;
+      return {
+        ...state,
+        knowledge: state.knowledge - ORDER_UNLOCK_KNOWLEDGE_COST,
+        orderUnlocked: true,
+      };
+    }
+
+    case SET_TUTORIAL_STEP: {
+      // Don't downgrade — tutorial only ever moves forward.
+      const cur = state.tutorialStep ?? 0;
+      const target = action.step;
+      if (cur === TUTORIAL.DONE) return state;
+      if (typeof target !== 'number' || target <= cur) return state;
+      return { ...state, tutorialStep: target };
+    }
+
+    case COMPLETE_TUTORIAL: {
+      if (state.tutorialStep === TUTORIAL.DONE) return state;
+      return { ...state, tutorialStep: TUTORIAL.DONE };
     }
 
     case LOAD_GAME: {

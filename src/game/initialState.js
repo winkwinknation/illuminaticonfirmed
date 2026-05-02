@@ -13,6 +13,7 @@ export const makeNewGame = (now = Date.now()) => ({
 
   totalMoneyEarned: 0,
   totalFaithEarned: 0,
+  totalKnowledgeEarned: 0,
   totalSacrifices: 0,
   totalMissions: 0,
 
@@ -27,6 +28,12 @@ export const makeNewGame = (now = Date.now()) => ({
   boons: {},
   unlockedLore: {},
 
+  // Order tab is paid for once with knowledge; persists across prestige.
+  orderUnlocked: false,
+  // Tutorial step (0 = just started, advances as the player completes each
+  // guided action). 99 = finished/skipped. Persists across prestige.
+  tutorialStep: 0,
+
   lastOfflineSummary: null,
 });
 
@@ -39,4 +46,6 @@ export const makeNewGameWithBoons = (carryOver, now = Date.now()) => ({
   unlockedLore: carryOver.unlockedLore,
   createdAt: carryOver.createdAt,
   playtimeMs: carryOver.playtimeMs,
+  orderUnlocked: carryOver.orderUnlocked,
+  tutorialStep: carryOver.tutorialStep,
 });

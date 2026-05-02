@@ -11,6 +11,9 @@
 //   reduceMissionCd  : multiplies mission cooldown duration (lower is faster)
 //
 // cost: { kind: 'money'|'faith'|'knowledge'|'multi', amount or amounts }
+//
+// `tier` controls display order within a category.
+// `unlock` (optional) is interpreted by selectors.isUnlocked.
 
 export const UPGRADES = [
   // --- Sacrifice tree ---
@@ -23,6 +26,7 @@ export const UPGRADES = [
     cost: { kind: 'money', base: 15 },
     effect: { kind: 'multSacrifice', addPerLevel: 1 },
     flavor: 'Practice makes the pact firmer.',
+    tier: 1,
   },
   {
     id: 'sac_2',
@@ -33,6 +37,8 @@ export const UPGRADES = [
     cost: { kind: 'multi', money: 250, faith: 25 },
     effect: { kind: 'multSacrificeMul', perLevel: 1.5 },
     flavor: 'A wound that remembers.',
+    tier: 2,
+    unlock: [{ kind: 'totalSacrifices', n: 5 }, { kind: 'upgradeOwned', id: 'sac_1', n: 3 }],
   },
   {
     id: 'sac_3',
@@ -43,6 +49,32 @@ export const UPGRADES = [
     cost: { kind: 'money', base: 60 },
     effect: { kind: 'addMaxHp', perLevel: 5 },
     flavor: 'A larger vessel pours a larger libation.',
+    tier: 3,
+    unlock: [{ kind: 'totalSacrifices', n: 10 }],
+  },
+  {
+    id: 'sac_4',
+    name: 'Veiled Altar',
+    category: 'Sacrifice',
+    desc: '+2 faith per sacrifice (flat).',
+    maxOwned: 25,
+    cost: { kind: 'multi', money: 1500, faith: 100 },
+    effect: { kind: 'multSacrifice', addPerLevel: 2 },
+    flavor: 'What the walls hide, the floor remembers.',
+    tier: 4,
+    unlock: [{ kind: 'totalSacrifices', n: 25 }, { kind: 'totalFaithEarned', n: 500 }],
+  },
+  {
+    id: 'sac_5',
+    name: 'Eclipse Pact',
+    category: 'Sacrifice',
+    desc: '×1.75 faith per sacrifice (multiplicative).',
+    maxOwned: 8,
+    cost: { kind: 'multi', money: 12000, faith: 600, knowledge: 25 },
+    effect: { kind: 'multSacrificeMul', perLevel: 1.75 },
+    flavor: 'A debt taken in shadow is repaid in light.',
+    tier: 5,
+    unlock: [{ kind: 'upgradeOwned', id: 'sac_2', n: 3 }, { kind: 'totalFaithEarned', n: 3000 }],
   },
 
   // --- Skills (boost society missions) ---
@@ -55,6 +87,8 @@ export const UPGRADES = [
     cost: { kind: 'money', base: 30 },
     effect: { kind: 'multMission', category: 'barter', perLevel: 0.25 },
     flavor: 'Every coin has two prices: one printed, one whispered.',
+    tier: 1,
+    unlock: [{ kind: 'totalMissions', n: 1 }],
   },
   {
     id: 'speech_1',
@@ -65,6 +99,8 @@ export const UPGRADES = [
     cost: { kind: 'multi', money: 50, faith: 5 },
     effect: { kind: 'multMission', category: 'rumor', perLevel: 0.25 },
     flavor: 'A well-placed question is worth a thousand answers.',
+    tier: 2,
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 3 }],
   },
   {
     id: 'fight_1',
@@ -75,6 +111,8 @@ export const UPGRADES = [
     cost: { kind: 'money', base: 80 },
     effect: { kind: 'multMission', category: 'danger', perLevel: 0.30 },
     flavor: 'The order frowns on violence and depends on it equally.',
+    tier: 3,
+    unlock: [{ kind: 'totalMoneyEarned', n: 600 }],
   },
   {
     id: 'fast_feet',
@@ -85,6 +123,44 @@ export const UPGRADES = [
     cost: { kind: 'multi', money: 200, faith: 10 },
     effect: { kind: 'reduceMissionCd', perLevel: 0.95 },
     flavor: 'Arrive before they expect; leave before they remember.',
+    tier: 4,
+    unlock: [{ kind: 'totalMissions', n: 10 }],
+  },
+  {
+    id: 'barter_2',
+    name: 'Counting House',
+    category: 'Skills',
+    desc: '+40% money from Barter missions.',
+    maxOwned: 20,
+    cost: { kind: 'multi', money: 1200, faith: 40 },
+    effect: { kind: 'multMission', category: 'barter', perLevel: 0.40 },
+    flavor: 'A column of figures is a kind of prayer.',
+    tier: 5,
+    unlock: [{ kind: 'upgradeOwned', id: 'barter_1', n: 5 }, { kind: 'totalMoneyEarned', n: 4000 }],
+  },
+  {
+    id: 'speech_2',
+    name: 'Whispering Gallery',
+    category: 'Skills',
+    desc: '+40% knowledge from Rumor missions.',
+    maxOwned: 20,
+    cost: { kind: 'multi', money: 800, faith: 50, knowledge: 10 },
+    effect: { kind: 'multMission', category: 'rumor', perLevel: 0.40 },
+    flavor: 'A room curved so that even silence carries.',
+    tier: 5,
+    unlock: [{ kind: 'upgradeOwned', id: 'speech_1', n: 4 }, { kind: 'totalKnowledgeEarned', n: 30 }],
+  },
+  {
+    id: 'fight_2',
+    name: 'Marked Hand',
+    category: 'Skills',
+    desc: '+50% reward from Dangerous missions.',
+    maxOwned: 20,
+    cost: { kind: 'multi', money: 4000, faith: 150 },
+    effect: { kind: 'multMission', category: 'danger', perLevel: 0.50 },
+    flavor: 'A signature only known by those who matter.',
+    tier: 6,
+    unlock: [{ kind: 'upgradeOwned', id: 'fight_1', n: 4 }, { kind: 'totalMissions', n: 30 }],
   },
 
   // --- Vitality ---
@@ -97,6 +173,8 @@ export const UPGRADES = [
     cost: { kind: 'money', base: 40 },
     effect: { kind: 'addMaxHp', perLevel: 10 },
     flavor: null,
+    tier: 1,
+    unlock: [{ kind: 'totalSacrifices', n: 1 }],
   },
   {
     id: 'vit_2',
@@ -107,6 +185,68 @@ export const UPGRADES = [
     cost: { kind: 'multi', money: 75, faith: 3 },
     effect: { kind: 'addHpRegen', perLevel: 0.5 },
     flavor: null,
+    tier: 2,
+    unlock: [{ kind: 'upgradeOwned', id: 'vit_1', n: 1 }],
+  },
+  {
+    id: 'vit_3',
+    name: 'Crimson Cellar',
+    category: 'Vitality',
+    desc: '+30 max HP.',
+    maxOwned: 25,
+    cost: { kind: 'multi', money: 600, faith: 25 },
+    effect: { kind: 'addMaxHp', perLevel: 30 },
+    flavor: 'Walls of stone, floors of stain.',
+    tier: 3,
+    unlock: [{ kind: 'totalSacrifices', n: 20 }, { kind: 'upgradeOwned', id: 'vit_1', n: 5 }],
+  },
+  {
+    id: 'vit_4',
+    name: 'Quick Bandage',
+    category: 'Vitality',
+    desc: '+1.5 HP regen per second.',
+    maxOwned: 30,
+    cost: { kind: 'multi', money: 2200, faith: 80 },
+    effect: { kind: 'addHpRegen', perLevel: 1.5 },
+    flavor: null,
+    tier: 4,
+    unlock: [{ kind: 'upgradeOwned', id: 'vit_2', n: 5 }, { kind: 'totalFaithEarned', n: 1000 }],
+  },
+  {
+    id: 'vit_5',
+    name: 'Stone Mask',
+    category: 'Vitality',
+    desc: '+50 max HP.',
+    maxOwned: 25,
+    cost: { kind: 'multi', money: 5000, faith: 200 },
+    effect: { kind: 'addMaxHp', perLevel: 50 },
+    flavor: 'A face the body cannot betray.',
+    tier: 5,
+    unlock: [{ kind: 'upgradeOwned', id: 'vit_3', n: 3 }, { kind: 'totalSacrifices', n: 50 }],
+  },
+  {
+    id: 'vit_6',
+    name: 'Shroud of Ages',
+    category: 'Vitality',
+    desc: '+8% max HP per level (multiplicative with all other HP).',
+    maxOwned: 12,
+    cost: { kind: 'multi', money: 18000, faith: 800, knowledge: 80 },
+    effect: { kind: 'addMaxHpPct', perLevel: 0.08 },
+    flavor: 'Wear the centuries; they soften the blade.',
+    tier: 6,
+    unlock: [{ kind: 'upgradeOwned', id: 'vit_5', n: 3 }, { kind: 'totalKnowledgeEarned', n: 200 }],
+  },
+  {
+    id: 'vit_7',
+    name: 'Reliquary Guard',
+    category: 'Vitality',
+    desc: '+3 HP regen per second.',
+    maxOwned: 20,
+    cost: { kind: 'multi', money: 9000, faith: 400, knowledge: 30 },
+    effect: { kind: 'addHpRegen', perLevel: 3 },
+    flavor: 'A pulse so steady the dying envy it.',
+    tier: 7,
+    unlock: [{ kind: 'upgradeOwned', id: 'vit_4', n: 5 }, { kind: 'totalFaithEarned', n: 4000 }],
   },
 
   // --- Idle ---
@@ -119,6 +259,8 @@ export const UPGRADES = [
     cost: { kind: 'multi', money: 120, faith: 8 },
     effect: { kind: 'addPassiveFaith', perLevel: 0.05 },
     flavor: 'Beads that pray themselves.',
+    tier: 1,
+    unlock: [{ kind: 'totalSacrifices', n: 8 }],
   },
   {
     id: 'idle_money',
@@ -129,6 +271,8 @@ export const UPGRADES = [
     cost: { kind: 'money', base: 200 },
     effect: { kind: 'addPassiveMoney', perLevel: 0.10 },
     flavor: 'A small leak in the world\'s pocket.',
+    tier: 2,
+    unlock: [{ kind: 'totalMoneyEarned', n: 500 }],
   },
   {
     id: 'idle_knowledge',
@@ -139,6 +283,20 @@ export const UPGRADES = [
     cost: { kind: 'multi', money: 400, knowledge: 5 },
     effect: { kind: 'addPassiveKnowledge', perLevel: 0.02 },
     flavor: null,
+    tier: 3,
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 15 }],
+  },
+  {
+    id: 'idle_combo',
+    name: 'Ouroboros Grant',
+    category: 'Idle',
+    desc: '+0.04 to all three idle streams (passive).',
+    maxOwned: 50,
+    cost: { kind: 'multi', money: 6000, faith: 200, knowledge: 30 },
+    effect: { kind: 'addPassiveAll', perLevel: 0.04 },
+    flavor: 'The serpent eats and feeds itself.',
+    tier: 4,
+    unlock: [{ kind: 'prestigeLevel', n: 1 }],
   },
 ];
 

@@ -12,8 +12,12 @@
 //   { kind: 'autoBuyUpgrade', category, intervalMs }
 //
 // Costs are paid at recruit time. `costGrowth` defaults to MEMBER_COST_GROWTH.
+//
+// `tier` controls display order. `unlock` is interpreted by selectors.isUnlocked
+// and is implicitly ANDed with the global Order knowledge gate (orderUnlocked).
 
 export const MEMBERS = [
+  // ---------- Active members ----------
   {
     id: 'acolyte',
     name: 'Acolyte',
@@ -22,6 +26,7 @@ export const MEMBERS = [
     cost: { money: 200, faith: 50 },
     maxOwned: 20,
     behavior: { kind: 'autoSacrifice', minHpFraction: 0.5, intervalMs: 3000 },
+    tier: 1,
   },
   {
     id: 'hawker',
@@ -31,6 +36,8 @@ export const MEMBERS = [
     cost: { money: 300, faith: 30 },
     maxOwned: 15,
     behavior: { kind: 'autoMission', missionId: 'barter_market' },
+    tier: 2,
+    unlock: [{ kind: 'totalMoneyEarned', n: 250 }],
   },
   {
     id: 'spy',
@@ -40,6 +47,8 @@ export const MEMBERS = [
     cost: { money: 500, faith: 75 },
     maxOwned: 15,
     behavior: { kind: 'autoMission', missionId: 'rumor_tavern' },
+    tier: 3,
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 5 }, { kind: 'memberOwned', id: 'hawker', n: 1 }],
   },
   {
     id: 'enforcer',
@@ -49,6 +58,11 @@ export const MEMBERS = [
     cost: { money: 2500, faith: 200 },
     maxOwned: 12,
     behavior: { kind: 'autoMission', missionId: 'danger_heist', minHpFraction: 0.6 },
+    tier: 5,
+    unlock: [
+      { kind: 'totalMoneyEarned', n: 2000 },
+      { kind: 'totalMissions', n: 15 },
+    ],
   },
   {
     id: 'scribe',
@@ -58,6 +72,8 @@ export const MEMBERS = [
     cost: { money: 8000, faith: 600, knowledge: 50 },
     maxOwned: 10,
     behavior: { kind: 'autoMission', missionId: 'rumor_archive', minHpFraction: 0.4 },
+    tier: 7,
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 80 }, { kind: 'memberOwned', id: 'spy', n: 1 }],
   },
   {
     id: 'steward',
@@ -67,7 +83,10 @@ export const MEMBERS = [
     cost: { money: 5000, faith: 250, knowledge: 30 },
     maxOwned: 5,
     behavior: { kind: 'autoBuyUpgrade', intervalMs: 6000 },
+    tier: 6,
+    unlock: [{ kind: 'totalMoneyEarned', n: 6000 }, { kind: 'totalMissions', n: 25 }],
   },
+
   // ---------- Passive members ----------
   {
     id: 'apothecary',
@@ -77,6 +96,8 @@ export const MEMBERS = [
     cost: { money: 800, faith: 80 },
     maxOwned: 25,
     effect: { kind: 'addHpRegen', perLevel: 0.4 },
+    tier: 2,
+    unlock: [{ kind: 'totalSacrifices', n: 10 }],
   },
   {
     id: 'cantor',
@@ -86,6 +107,8 @@ export const MEMBERS = [
     cost: { money: 1200, faith: 200 },
     maxOwned: 20,
     effect: { kind: 'multAllFaith', perLevel: 0.08 },
+    tier: 4,
+    unlock: [{ kind: 'totalFaithEarned', n: 250 }],
   },
   {
     id: 'treasurer',
@@ -95,6 +118,8 @@ export const MEMBERS = [
     cost: { money: 3000, faith: 150 },
     maxOwned: 20,
     effect: { kind: 'multAllMoney', perLevel: 0.10 },
+    tier: 4,
+    unlock: [{ kind: 'totalMoneyEarned', n: 1500 }],
   },
   {
     id: 'cryptographer',
@@ -104,6 +129,8 @@ export const MEMBERS = [
     cost: { money: 4000, faith: 200, knowledge: 20 },
     maxOwned: 20,
     effect: { kind: 'multAllKnowledge', perLevel: 0.10 },
+    tier: 5,
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 30 }],
   },
   {
     id: 'diplomat',
@@ -113,6 +140,30 @@ export const MEMBERS = [
     cost: { money: 6000, faith: 400, knowledge: 40 },
     maxOwned: 12,
     effect: { kind: 'multAllMissionRewards', perLevel: 0.15 },
+    tier: 6,
+    unlock: [{ kind: 'totalMissions', n: 30 }],
+  },
+  {
+    id: 'archivist',
+    name: 'Archivist',
+    desc: '+0.06 knowledge per second per Archivist (passive).',
+    flavor: 'Older than the ledger they keep.',
+    cost: { money: 7500, faith: 350, knowledge: 30 },
+    maxOwned: 15,
+    effect: { kind: 'addPassiveKnowledge', perLevel: 0.06 },
+    tier: 7,
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 120 }, { kind: 'memberOwned', id: 'cryptographer', n: 1 }],
+  },
+  {
+    id: 'patriarch',
+    name: 'Patriarch',
+    desc: '+12% to ALL gains per Patriarch (additive).',
+    flavor: 'Signs nothing. Decides everything.',
+    cost: { money: 25000, faith: 1500, knowledge: 150 },
+    maxOwned: 8,
+    effect: { kind: 'multAll', perLevel: 0.12 },
+    tier: 8,
+    unlock: [{ kind: 'prestigeLevel', n: 1 }],
   },
 ];
 

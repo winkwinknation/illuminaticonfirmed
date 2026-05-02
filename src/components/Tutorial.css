@@ -1,0 +1,91 @@
+.tut__list {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  font-size: 0.92rem;
+}
+.tut__pip {
+  display: inline-block;
+  width: 1.4rem;
+  text-align: center;
+  margin-right: 0.4rem;
+  font-weight: 700;
+}
+.tut__pip[data-kind="faith"] { color: var(--faith); }
+.tut__pip[data-kind="money"] { color: var(--money); }
+.tut__pip[data-kind="knowledge"] { color: var(--knowledge); }
+
+.tut__hint {
+  margin-top: 0.6rem;
+  font-style: italic;
+  color: var(--gold-300);
+  font-size: 0.88rem;
+}
+
+/* ---------- Floating step hint ---------- */
+
+.tut-hint {
+  position: fixed;
+  left: 50%;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(480px, calc(100% - 1.4rem));
+  background: linear-gradient(180deg, var(--navy-700), var(--navy-800));
+  border: 1px solid var(--gold-500);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-shadow: var(--shadow-md), 0 0 16px rgba(212, 175, 55, 0.35);
+  z-index: 50;
+  animation: tut-hint-in 220ms var(--easing);
+}
+@keyframes tut-hint-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+.tut-hint__inner { flex: 1; display: grid; gap: 0.15rem; }
+.tut-hint__title {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.tut-hint__body { color: var(--text); font-size: 0.92rem; line-height: 1.4; }
+.tut-hint__skip {
+  align-self: flex-start;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+.tut-hint__skip:hover { color: var(--gold-300); border-color: rgba(212, 175, 55, 0.6); }
+
+@media (min-width: 768px) {
+  /* Side nav rather than bottom nav, so the hint sits at bottom-right. */
+  .tut-hint { left: auto; right: 1rem; bottom: 1rem; transform: none; }
+  @keyframes tut-hint-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ---------- Pulsing highlight (used by nav + cards) ---------- */
+
+.tut-glow {
+  position: relative;
+  animation: tut-pulse 1.6s ease-in-out infinite;
+  box-shadow: 0 0 0 1px var(--gold-500), 0 0 14px rgba(212, 175, 55, 0.55);
+  border-radius: var(--radius);
+}
+@keyframes tut-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px var(--gold-500), 0 0 10px rgba(212, 175, 55, 0.4); }
+  50%      { box-shadow: 0 0 0 2px var(--gold-300), 0 0 20px rgba(212, 175, 55, 0.85); }
+}

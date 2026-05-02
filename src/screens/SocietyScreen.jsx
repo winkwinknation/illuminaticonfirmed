@@ -4,7 +4,7 @@ import { N } from '../components/Number';
 import { ProgressBar } from '../components/ProgressBar/ProgressBar';
 import { useGame } from '../context/GameContext';
 import { startMission } from '../game/actions';
-import { MISSIONS } from '../data/missions';
+import { TUTORIAL } from '../game/constants';
 import {
   canAffordMission,
   isMissionRunning,
@@ -12,6 +12,9 @@ import {
   missionRemainingMs,
   missionRewardKnowledge,
   missionRewardMoney,
+  nextLockedMission,
+  unlockHints,
+  visibleMissions,
 } from '../game/selectors';
 import './SocietyScreen.css';
 
@@ -23,7 +26,7 @@ const useTick = (ms = 200) => {
   }, [ms]);
 };
 
-const MissionCard = ({ mission }) => {
+const MissionCard = ({ mission, glow }) => {
   const { state, dispatch } = useGame();
   useTick(200);
   const running = isMissionRunning(state, mission);
@@ -39,7 +42,7 @@ const MissionCard = ({ mission }) => {
   const disabled = running || cantAfford || tooHurt;
 
   return (
-    <article className={`mission mission--${mission.category}`}>
+    <article className={`mission mission--${mission.category} ${glow ? 'tut-glow' : ''}`}>
       <header className="mission__head">
         <h3 className="mission__title">{mission.name}</h3>
         <span className={`mission__tag mission__tag--${mission.category}`}>{mission.category}</span>
@@ -75,7 +78,26 @@ const MissionCard = ({ mission }) => {
   );
 };
 
+const NextLockedCard = ({ item, hints }) => (
+  <article className="mission mission--locked">
+    <header className="mission__head">
+      <h3 className="mission__title">An unspoken assignment…</h3>
+      <span className="mission__tag mission__tag--locked">Locked</span>
+    </header>
+    <p className="mission__desc">A new path waits to be found. The order will reveal it once you have:</p>
+    <ul className="mission__lock-list">
+      {hints.map((h, i) => <li key={i}>· {h}</li>)}
+    </ul>
+    {item.flavor && <p className="mission__flavor">{item.flavor}</p>}
+  </article>
+);
+
 export const SocietyScreen = () => {
+  const { state } = useGame();
+  const missions = visibleMissions(state);
+  const next = nextLockedMission(state);
+  const hints = next ? unlockHints(state, next) : [];
+
   return (
     <section className="society">
       <header className="society__head">
@@ -84,7 +106,14 @@ export const SocietyScreen = () => {
       </header>
 
       <div className="society__grid">
-        {MISSIONS.map((m) => <MissionCard key={m.id} mission={m} />)}
+        {missions.map((m, i) => (
+          <MissionCard
+            key={m.id}
+            mission={m}
+            glow={state.tutorialStep === TUTORIAL.START_MISSION && i === 0}
+          />
+        ))}
+        {next && <NextLockedCard item={next} hints={hints} />}
       </div>
     </section>
   );

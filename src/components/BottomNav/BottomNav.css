@@ -22,6 +22,8 @@
   gap: 2px;
 }
 .nav__item:hover { color: var(--gold-300); }
+.nav__item--locked { opacity: 0.55; }
+.nav__item--locked:hover { opacity: 0.85; }
 .nav__item--active {
   color: var(--gold-300);
   background: rgba(212,175,55,0.08);

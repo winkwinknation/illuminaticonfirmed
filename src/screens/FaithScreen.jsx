@@ -3,6 +3,7 @@ import { Button } from '../components/Button/Button';
 import { N, formatNumber } from '../components/Number';
 import { useGame } from '../context/GameContext';
 import { sacrifice, sacrificeMember } from '../game/actions';
+import { TUTORIAL } from '../game/constants';
 import { MEMBERS } from '../data/members';
 import {
   hpRegenPerSec,
@@ -76,7 +77,7 @@ export const FaithScreen = () => {
             size="lg"
             disabled={tooLow}
             onClick={onSacrifice}
-            className="faith__btn"
+            className={`faith__btn ${state.tutorialStep === TUTORIAL.SACRIFICE ? 'tut-glow' : ''}`}
           >
             Sacrifice 25 HP → +{faithGain} Faith
           </Button>
@@ -93,33 +94,35 @@ export const FaithScreen = () => {
         <p className="faith__total">Total sacrifices made: <strong>{state.totalSacrifices}</strong></p>
       </div>
 
-      <div className="faith__panel faith__panel--members">
-        <h2 className="faith__sub">Sacrifice a Member</h2>
-        <p className="faith__lead">
-          Their devotion was theirs to give. Spend a member of your order to draw a deeper draught of faith.
-        </p>
-        {ownedMembers.length === 0 ? (
-          <p className="faith__empty">No members yet. Recruit some on the Order screen, then return here when their use is at hand.</p>
-        ) : (
-          <ul className="faith__mem-grid">
-            {ownedMembers.map(({ member, count }) => {
-              const gain = memberSacrificeFaith(state, member);
-              return (
-                <li key={member.id} className="faith__mem">
-                  <div className="faith__mem-info">
-                    <span className="faith__mem-name">{member.name}</span>
-                    <span className="faith__mem-count">×{count}</span>
-                  </div>
-                  <div className="faith__mem-row">
-                    <span className="faith__mem-gain">+{gain} faith</span>
-                    <Button variant="danger" size="sm" onClick={() => onSacrificeMember(member)}>Sacrifice 1</Button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+      {state.orderUnlocked && (
+        <div className="faith__panel faith__panel--members">
+          <h2 className="faith__sub">Sacrifice a Member</h2>
+          <p className="faith__lead">
+            Their devotion was theirs to give. Spend a member of your order to draw a deeper draught of faith.
+          </p>
+          {ownedMembers.length === 0 ? (
+            <p className="faith__empty">No members yet. Recruit some on the Order screen, then return here when their use is at hand.</p>
+          ) : (
+            <ul className="faith__mem-grid">
+              {ownedMembers.map(({ member, count }) => {
+                const gain = memberSacrificeFaith(state, member);
+                return (
+                  <li key={member.id} className="faith__mem">
+                    <div className="faith__mem-info">
+                      <span className="faith__mem-name">{member.name}</span>
+                      <span className="faith__mem-count">×{count}</span>
+                    </div>
+                    <div className="faith__mem-row">
+                      <span className="faith__mem-gain">+{gain} faith</span>
+                      <Button variant="danger" size="sm" onClick={() => onSacrificeMember(member)}>Sacrifice 1</Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      )}
     </section>
   );
 };

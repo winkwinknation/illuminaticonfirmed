@@ -83,3 +83,47 @@
 .mem__money { color: var(--money); }
 .mem__faith { color: var(--faith); }
 .mem__know { color: var(--knowledge); }
+
+.mem--locked {
+  border-style: dashed;
+  opacity: 0.85;
+}
+.mem--locked .mem__title { color: var(--text-dim); }
+.mem__lock-list {
+  font-size: 0.82rem;
+  color: var(--gold-300);
+  display: grid;
+  gap: 0.2rem;
+}
+
+.order__lock {
+  background: linear-gradient(180deg, var(--navy-700), var(--navy-800));
+  border: 1px solid rgba(212,175,55,0.25);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.3rem 1.5rem;
+  display: grid;
+  gap: 0.9rem;
+  box-shadow: var(--shadow-sm);
+  max-width: 720px;
+}
+.order__lock-title {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: 1.2rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.order__lock-text { color: var(--text-dim); }
+.order__lock-progress { display: grid; gap: 0.3rem; }
+.order__lock-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.order__lock-cta { display: flex; justify-content: flex-start; }
+.order__lock-hint {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
