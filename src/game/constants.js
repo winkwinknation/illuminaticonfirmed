@@ -82,3 +82,10 @@ export const SIGIL_PASSIVE_SECONDS = 90;
 export const SIGIL_MIN_FAITH = 25;
 export const SIGIL_MIN_MONEY = 60;
 export const SIGIL_MIN_KNOWLEDGE = 5;
+
+// "Watch the Order's Message" — in-game propaganda gate that pays out a
+// multiplied sigil reward in exchange for waiting through a fake ad. Pure
+// flavor; there is no real ad network. The pattern is borrowed from mobile
+// rewarded-video designs because the commit→wait→payoff loop is sticky.
+export const SIGIL_AD_DURATION_MS = 10_000;
+export const SIGIL_AD_MULTIPLIER = 3;

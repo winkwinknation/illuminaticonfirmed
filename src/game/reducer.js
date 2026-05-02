@@ -442,12 +442,14 @@ export const reducer = (state, action) => {
           nextSigilAt: now + randInt(SIGIL_SPAWN_MIN_MS, SIGIL_SPAWN_MAX_MS),
         };
       }
+      const mul = Math.max(1, action.multiplier || 1);
       // Reward = N seconds of current passive rates plus a small floor so even
-      // early-game sigils feel worth chasing.
+      // early-game sigils feel worth chasing. Multiplier applies to both the
+      // computed and the floor so an "ad-boosted" claim is always larger.
       const sec = SIGIL_PASSIVE_SECONDS;
-      const faithGain = Math.max(SIGIL_MIN_FAITH, Math.floor(passiveFaithPerSec(state) * sec));
-      const moneyGain = Math.max(SIGIL_MIN_MONEY, Math.floor(passiveMoneyPerSec(state) * sec));
-      const knowledgeGain = Math.max(SIGIL_MIN_KNOWLEDGE, Math.floor(passiveKnowledgePerSec(state) * sec));
+      const faithGain = Math.floor(Math.max(SIGIL_MIN_FAITH, passiveFaithPerSec(state) * sec) * mul);
+      const moneyGain = Math.floor(Math.max(SIGIL_MIN_MONEY, passiveMoneyPerSec(state) * sec) * mul);
+      const knowledgeGain = Math.floor(Math.max(SIGIL_MIN_KNOWLEDGE, passiveKnowledgePerSec(state) * sec) * mul);
       return {
         ...state,
         faith: state.faith + faithGain,
@@ -458,7 +460,13 @@ export const reducer = (state, action) => {
         totalKnowledgeEarned: (state.totalKnowledgeEarned || 0) + knowledgeGain,
         sigil: null,
         nextSigilAt: now + randInt(SIGIL_SPAWN_MIN_MS, SIGIL_SPAWN_MAX_MS),
-        lastSigilGain: { faith: faithGain, money: moneyGain, knowledge: knowledgeGain, at: now },
+        lastSigilGain: {
+          faith: faithGain,
+          money: moneyGain,
+          knowledge: knowledgeGain,
+          mul,
+          at: now,
+        },
       };
     }
 
