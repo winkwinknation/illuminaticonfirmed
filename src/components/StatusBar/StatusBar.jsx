@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGame } from '../../context/GameContext';
-import { maxHp } from '../../game/selectors';
+import { distinctUpgradesOwned, maxHp } from '../../game/selectors';
 import { formatNumber, N } from '../Number';
 import { ProgressBar } from '../ProgressBar/ProgressBar';
 import './StatusBar.css';
@@ -8,6 +8,7 @@ import './StatusBar.css';
 export const StatusBar = () => {
   const { state } = useGame();
   const cap = maxHp(state);
+  const resonance = distinctUpgradesOwned(state);
 
   return (
     <header className="status">
@@ -48,6 +49,17 @@ export const StatusBar = () => {
             <span className="status__icon">◉</span>
             <span className="status__val"><N value={state.secretKnowledge} placesUnder1000={0} /></span>
             <span className="status__lbl">SK</span>
+          </div>
+        )}
+        {resonance > 0 && (
+          <div
+            className="status__r"
+            data-kind="resonance"
+            title={`Resonance: ${resonance} distinct upgrades owned (+${resonance}% to all gains)`}
+          >
+            <span className="status__icon">⚯</span>
+            <span className="status__val">+{resonance}%</span>
+            <span className="status__lbl">Resonance</span>
           </div>
         )}
       </div>

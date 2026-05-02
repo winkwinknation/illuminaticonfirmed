@@ -46,6 +46,14 @@ export const makeNewGame = (now = Date.now()) => ({
   totalSpiesLost: 0,
   totalEnginesLost: 0,
 
+  // Sacrifice streak (compulsion-loop multiplier).
+  streak: 0,
+  lastSacrificeAt: 0,
+
+  // Sigil random event. nextSpawnAt is wall-clock ms.
+  sigil: null,             // { spawnedAt, expiresAt, kind } | null
+  nextSigilAt: now + 60_000, // first sigil ~1 min in (lazily updated by tick)
+
   lastOfflineSummary: null,
 });
 

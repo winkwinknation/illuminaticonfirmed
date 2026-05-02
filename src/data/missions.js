@@ -1,19 +1,13 @@
 // Missions now run for `durationMs` after start; rewards are paid out on completion.
 // Costs (faith, hp) are deducted at start.
 //
-// `tier` controls display order and what counts as the "next" locked teaser.
-// `unlock` is a list of conditions interpreted by selectors.isUnlocked.
-//   { kind: 'always' }                          — no requirement (omit to imply this)
-//   { kind: 'totalSacrifices', n }
-//   { kind: 'totalMissions', n }
-//   { kind: 'totalMoneyEarned', n }
-//   { kind: 'totalFaithEarned', n }
-//   { kind: 'totalKnowledgeEarned', n }
-//   { kind: 'knowledge', n }                    — current knowledge balance
-//   { kind: 'upgradeOwned', id, n }
-//   { kind: 'memberOwned', id, n }
-//   { kind: 'prestigeLevel', n }
-//   { kind: 'orderUnlocked' }
+// Pacing notes:
+//   - Tier 1–2 missions are short (≤4s) so the early dopamine loop fires
+//     constantly and the player is always almost-affording the next purchase.
+//   - Mid-tier missions trade duration for size — they fund the bigger ticket
+//     items between sacrifice rounds.
+//   - Late-tier missions stretch out and reward in chunks meant to push you
+//     across prestige thresholds.
 
 export const MISSIONS = [
   {
@@ -22,8 +16,8 @@ export const MISSIONS = [
     name: 'Barter at the Market',
     desc: 'A loaf for a rumor, a rumor for a coin.',
     cost: { faith: 1 },
-    reward: { money: 8 },
-    durationMs: 3000,
+    reward: { money: 20 },
+    durationMs: 2000,
     flavor: 'Coins from the careless.',
     tier: 1,
   },
@@ -33,8 +27,8 @@ export const MISSIONS = [
     name: 'Listen at the Tavern',
     desc: 'Drinkers tell on themselves and their masters.',
     cost: { faith: 2 },
-    reward: { knowledge: 1 },
-    durationMs: 5000,
+    reward: { knowledge: 3 },
+    durationMs: 3500,
     flavor: 'Wine loosens what locks could not.',
     tier: 2,
     unlock: [{ kind: 'totalSacrifices', n: 3 }],
@@ -45,8 +39,8 @@ export const MISSIONS = [
     name: 'Run the Caravan Books',
     desc: 'Every ledger has a margin in it.',
     cost: { faith: 4, hpFraction: 0.05 },
-    reward: { money: 35 },
-    durationMs: 6000,
+    reward: { money: 80 },
+    durationMs: 5000,
     flavor: null,
     tier: 3,
     unlock: [{ kind: 'totalMoneyEarned', n: 100 }],
@@ -57,8 +51,8 @@ export const MISSIONS = [
     name: 'Eavesdrop at Court',
     desc: 'Nobles whisper in the halls.',
     cost: { faith: 6, hpFraction: 0.05 },
-    reward: { knowledge: 4 },
-    durationMs: 9000,
+    reward: { knowledge: 8 },
+    durationMs: 7000,
     flavor: null,
     tier: 4,
     unlock: [{ kind: 'totalMissions', n: 8 }],
@@ -69,8 +63,8 @@ export const MISSIONS = [
     name: 'Skim the Postal Routes',
     desc: 'A copper from each parcel; nobody counts what was never theirs.',
     cost: { faith: 12 },
-    reward: { money: 95, knowledge: 1 },
-    durationMs: 8000,
+    reward: { money: 200, knowledge: 2 },
+    durationMs: 6500,
     flavor: 'Letters arrive late, the order arrives early.',
     tier: 4,
     unlock: [{ kind: 'totalMoneyEarned', n: 350 }, { kind: 'upgradeOwned', id: 'barter_1', n: 2 }],
@@ -81,8 +75,8 @@ export const MISSIONS = [
     name: 'Midnight Heist',
     desc: 'Risky, lucrative, and forgotten by morning.',
     cost: { faith: 10, hpFraction: 0.20 },
-    reward: { money: 150 },
-    durationMs: 8000,
+    reward: { money: 350 },
+    durationMs: 6500,
     flavor: 'Doors are suggestions.',
     tier: 5,
     unlock: [{ kind: 'totalMoneyEarned', n: 800 }, { kind: 'upgradeOwned', id: 'sac_1', n: 1 }],
@@ -93,8 +87,8 @@ export const MISSIONS = [
     name: 'Sit on the Other Side',
     desc: 'A confessor with a thumb on the latch hears more than he gives.',
     cost: { faith: 14, hpFraction: 0.04 },
-    reward: { knowledge: 7 },
-    durationMs: 10000,
+    reward: { knowledge: 15 },
+    durationMs: 8500,
     flavor: 'Forgive them, for they will say it twice.',
     tier: 5,
     unlock: [{ kind: 'totalKnowledgeEarned', n: 25 }],
@@ -105,8 +99,8 @@ export const MISSIONS = [
     name: 'Lean on the Banker',
     desc: 'Reminding men of debts they pretend to forget.',
     cost: { faith: 18, hpFraction: 0.15 },
-    reward: { money: 320, knowledge: 1 },
-    durationMs: 12000,
+    reward: { money: 700, knowledge: 3 },
+    durationMs: 10000,
     flavor: null,
     tier: 6,
     unlock: [{ kind: 'totalMoneyEarned', n: 3000 }],
@@ -117,8 +111,8 @@ export const MISSIONS = [
     name: 'Crack the Archives',
     desc: 'Every parchment hides a parchment.',
     cost: { faith: 25, hpFraction: 0.10 },
-    reward: { knowledge: 12, money: 50 },
-    durationMs: 15000,
+    reward: { knowledge: 25, money: 100 },
+    durationMs: 12500,
     flavor: null,
     tier: 7,
     unlock: [{ kind: 'totalMissions', n: 25 }, { kind: 'totalKnowledgeEarned', n: 60 }],
@@ -129,8 +123,8 @@ export const MISSIONS = [
     name: 'Reroute the Treasury',
     desc: 'A few coins per shipment is not theft, only friction.',
     cost: { faith: 40 },
-    reward: { money: 800 },
-    durationMs: 14000,
+    reward: { money: 1500 },
+    durationMs: 12000,
     flavor: 'Friction warms the hands of those who collect it.',
     tier: 8,
     unlock: [{ kind: 'totalMoneyEarned', n: 15000 }],
@@ -141,8 +135,8 @@ export const MISSIONS = [
     name: 'Forge a Treaty',
     desc: 'Two seals, one author, three war profits.',
     cost: { faith: 60, hpFraction: 0.20 },
-    reward: { money: 1800, knowledge: 5 },
-    durationMs: 22000,
+    reward: { money: 3500, knowledge: 10 },
+    durationMs: 18000,
     flavor: 'Peace, written in our hand, costs more than war.',
     tier: 9,
     unlock: [{ kind: 'totalMoneyEarned', n: 40000 }, { kind: 'memberOwned', id: 'enforcer', n: 1 }],
@@ -153,8 +147,8 @@ export const MISSIONS = [
     name: 'Burn the Census',
     desc: 'Nothing is freer than the man no clerk has heard of.',
     cost: { faith: 90, hpFraction: 0.12 },
-    reward: { knowledge: 40, money: 200 },
-    durationMs: 25000,
+    reward: { knowledge: 80, money: 400 },
+    durationMs: 22000,
     flavor: null,
     tier: 9,
     unlock: [{ kind: 'totalKnowledgeEarned', n: 250 }],
@@ -165,8 +159,8 @@ export const MISSIONS = [
     name: 'Bleed the Mint',
     desc: 'Skim from the press itself; every coin a quiet ambassador.',
     cost: { faith: 150 },
-    reward: { money: 5000 },
-    durationMs: 35000,
+    reward: { money: 8000 },
+    durationMs: 30000,
     flavor: 'Money is older than the kings who sign it.',
     tier: 10,
     unlock: [{ kind: 'totalMoneyEarned', n: 100000 }],
@@ -177,8 +171,8 @@ export const MISSIONS = [
     name: 'Quiet a Voice',
     desc: 'A cabinet rearranged by a single absence. Pay your hands well.',
     cost: { faith: 200, hpFraction: 0.25 },
-    reward: { money: 8000, knowledge: 30 },
-    durationMs: 40000,
+    reward: { money: 14000, knowledge: 60 },
+    durationMs: 35000,
     flavor: 'Heads of state are heads, mostly.',
     tier: 10,
     unlock: [{ kind: 'totalMissions', n: 75 }, { kind: 'memberOwned', id: 'enforcer', n: 2 }],
@@ -189,8 +183,8 @@ export const MISSIONS = [
     name: 'Court the Oracle',
     desc: 'Pay an old prophet for a sentence you write together.',
     cost: { faith: 280, hpFraction: 0.08 },
-    reward: { knowledge: 200, money: 1000 },
-    durationMs: 45000,
+    reward: { knowledge: 400, money: 2000 },
+    durationMs: 40000,
     flavor: 'Tomorrow consults today; today bills tomorrow.',
     tier: 11,
     unlock: [{ kind: 'totalKnowledgeEarned', n: 1000 }],
@@ -201,8 +195,8 @@ export const MISSIONS = [
     name: 'Author a Charter',
     desc: 'Draft the founding document of a future enterprise — at scale.',
     cost: { faith: 500 },
-    reward: { money: 25000, knowledge: 50 },
-    durationMs: 60000,
+    reward: { money: 45000, knowledge: 120 },
+    durationMs: 55000,
     flavor: 'Articles signed in our hand outlast their signatories.',
     tier: 12,
     unlock: [{ kind: 'totalMoneyEarned', n: 1000000 }],
@@ -213,8 +207,8 @@ export const MISSIONS = [
     name: 'Stoke a Revolution',
     desc: 'The order does not start fires. It changes the wind.',
     cost: { faith: 1500, hpFraction: 0.30 },
-    reward: { money: 80000, faith: 5000, knowledge: 800 },
-    durationMs: 90000,
+    reward: { money: 150000, faith: 8000, knowledge: 1500 },
+    durationMs: 80000,
     flavor: 'A throne overturns; a bookkeeper survives.',
     tier: 13,
     unlock: [{ kind: 'prestigeLevel', n: 1 }, { kind: 'totalMissions', n: 200 }],

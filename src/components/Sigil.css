@@ -1,0 +1,80 @@
+.sigil {
+  position: fixed;
+  top: 84px;
+  right: 18px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-300);
+  background:
+    conic-gradient(var(--gold-300) var(--sigil-pct, 100%), transparent 0)
+    padding-box,
+    radial-gradient(circle at 30% 30%, #f7e8b6, var(--gold-500) 50%, var(--gold-700) 100%) border-box;
+  box-shadow: 0 0 18px rgba(212, 175, 55, 0.7), 0 0 36px rgba(212, 175, 55, 0.4);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  z-index: 80;
+  animation: sigil-bob 2.4s ease-in-out infinite;
+  transition: transform 120ms var(--easing);
+}
+.sigil:hover { transform: scale(1.08); }
+.sigil:active { transform: scale(0.95); }
+
+.sigil__eye {
+  font-size: 1.7rem;
+  color: var(--navy-900);
+  text-shadow: 0 0 6px var(--gold-300);
+  position: relative;
+  z-index: 1;
+}
+
+.sigil__pulse {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-300);
+  opacity: 0;
+  animation: sigil-pulse 1.6s ease-out infinite;
+}
+
+@keyframes sigil-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+@keyframes sigil-pulse {
+  0%   { transform: scale(0.8); opacity: 0.7; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.sigil-toast {
+  position: fixed;
+  top: 84px;
+  right: 90px;
+  background: linear-gradient(180deg, var(--navy-700), var(--navy-900));
+  border: 1px solid var(--gold-300);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.85rem;
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-md), 0 0 14px rgba(212, 175, 55, 0.45);
+  z-index: 79;
+  animation: sigil-toast-in 240ms var(--easing);
+}
+.sigil-toast strong {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+@keyframes sigil-toast-in {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@media (max-width: 768px) {
+  .sigil { top: auto; bottom: 90px; right: 14px; width: 56px; height: 56px; }
+  .sigil-toast { top: auto; bottom: 90px; right: 78px; max-width: 220px; }
+}

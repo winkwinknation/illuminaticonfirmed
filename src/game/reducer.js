@@ -4,11 +4,13 @@ import {
   AUTO_FIRE,
   BUY_BOON,
   BUY_UPGRADE,
+  CLAIM_SIGIL,
   CLEAR_RIVALRY_LOG,
   COMPLETE_ORDER_TUTORIAL,
   COMPLETE_RIVALRY_TUTORIAL,
   COMPLETE_TUTORIAL,
   DISMISS_RIVALRY_RESULT,
+  EXPIRE_SIGIL,
   LOAD_GAME,
   PRESTIGE,
   RECRUIT_MEMBER,
@@ -26,7 +28,20 @@ import {
   UNLOCK_LORE,
   UNLOCK_ORDER,
 } from './actions';
-import { ORDER_UNLOCK_KNOWLEDGE_COST, TUTORIAL } from './constants';
+import {
+  ORDER_UNLOCK_KNOWLEDGE_COST,
+  SIGIL_LIFETIME_MS,
+  SIGIL_MIN_FAITH,
+  SIGIL_MIN_KNOWLEDGE,
+  SIGIL_MIN_MONEY,
+  SIGIL_PASSIVE_SECONDS,
+  SIGIL_SPAWN_MAX_MS,
+  SIGIL_SPAWN_MIN_MS,
+  STREAK_DECAY_MS,
+  STREAK_MAX,
+  STREAK_WINDOW_MS,
+  TUTORIAL,
+} from './constants';
 import { RIVALRY_MISSIONS_BY_ID } from '../data/rivalryMissions';
 import { clamp, revealBoonCost } from './formulas';
 import { makeNewGame, makeNewGameWithBoons } from './initialState';
@@ -146,6 +161,48 @@ const resolveDueMissions = (state, now = Date.now()) => {
 const randInt = (min, max) => {
   if (min === max) return min;
   return Math.floor(min + Math.random() * (max - min + 1));
+};
+
+// ---------- Streak helpers ----------
+
+const advanceStreak = (state, now) => {
+  const within = (now - (state.lastSacrificeAt || 0)) <= STREAK_WINDOW_MS;
+  const cur = state.streak || 0;
+  return within ? Math.min(STREAK_MAX, cur + 1) : 1;
+};
+
+const decayStreakIfStale = (state, now = Date.now()) => {
+  if (!state.streak) return state;
+  if (now - (state.lastSacrificeAt || 0) <= STREAK_DECAY_MS) return state;
+  return { ...state, streak: 0 };
+};
+
+// ---------- Sigil helpers ----------
+
+const sigilExpired = (state, now) =>
+  state.sigil && state.sigil.expiresAt <= now;
+
+// Spawns a sigil if its scheduled time has elapsed and none is currently
+// active. Also clears expired sigils.
+const tickSigil = (state, now = Date.now()) => {
+  let next = state;
+  if (sigilExpired(next, now)) {
+    next = {
+      ...next,
+      sigil: null,
+      nextSigilAt: now + randInt(SIGIL_SPAWN_MIN_MS, SIGIL_SPAWN_MAX_MS),
+    };
+  }
+  if (!next.sigil && next.nextSigilAt && next.nextSigilAt <= now) {
+    next = {
+      ...next,
+      sigil: { spawnedAt: now, expiresAt: now + SIGIL_LIFETIME_MS, kind: 'blessing' },
+    };
+  }
+  if (!next.nextSigilAt) {
+    next = { ...next, nextSigilAt: now + randInt(SIGIL_SPAWN_MIN_MS, SIGIL_SPAWN_MAX_MS) };
+  }
+  return next;
 };
 
 const decrementMember = (members, id, n) => {
@@ -311,7 +368,9 @@ export const reducer = (state, action) => {
   switch (action.type) {
     case TICK: {
       const ticked = applyTimeDelta(state, action.dtMs);
-      return resolveDueRivalryMissions(resolveDueMissions(ticked));
+      const after = resolveDueRivalryMissions(resolveDueMissions(ticked));
+      const now = Date.now();
+      return tickSigil(decayStreakIfStale(after, now), now);
     }
 
     case APPLY_OFFLINE: {
@@ -372,6 +431,47 @@ export const reducer = (state, action) => {
       return { ...state, rivalryLog: [] };
     }
 
+    case CLAIM_SIGIL: {
+      if (!state.sigil) return state;
+      const now = Date.now();
+      if (state.sigil.expiresAt <= now) {
+        // Expired, just clear.
+        return {
+          ...state,
+          sigil: null,
+          nextSigilAt: now + randInt(SIGIL_SPAWN_MIN_MS, SIGIL_SPAWN_MAX_MS),
+        };
+      }
+      // Reward = N seconds of current passive rates plus a small floor so even
+      // early-game sigils feel worth chasing.
+      const sec = SIGIL_PASSIVE_SECONDS;
+      const faithGain = Math.max(SIGIL_MIN_FAITH, Math.floor(passiveFaithPerSec(state) * sec));
+      const moneyGain = Math.max(SIGIL_MIN_MONEY, Math.floor(passiveMoneyPerSec(state) * sec));
+      const knowledgeGain = Math.max(SIGIL_MIN_KNOWLEDGE, Math.floor(passiveKnowledgePerSec(state) * sec));
+      return {
+        ...state,
+        faith: state.faith + faithGain,
+        money: state.money + moneyGain,
+        knowledge: state.knowledge + knowledgeGain,
+        totalFaithEarned: (state.totalFaithEarned || 0) + faithGain,
+        totalMoneyEarned: (state.totalMoneyEarned || 0) + moneyGain,
+        totalKnowledgeEarned: (state.totalKnowledgeEarned || 0) + knowledgeGain,
+        sigil: null,
+        nextSigilAt: now + randInt(SIGIL_SPAWN_MIN_MS, SIGIL_SPAWN_MAX_MS),
+        lastSigilGain: { faith: faithGain, money: moneyGain, knowledge: knowledgeGain, at: now },
+      };
+    }
+
+    case EXPIRE_SIGIL: {
+      if (!state.sigil) return state;
+      const now = Date.now();
+      return {
+        ...state,
+        sigil: null,
+        nextSigilAt: now + randInt(SIGIL_SPAWN_MIN_MS, SIGIL_SPAWN_MAX_MS),
+      };
+    }
+
     case STAMP_SAVED: {
       return { ...state, lastSavedAt: action.now };
     }
@@ -379,7 +479,11 @@ export const reducer = (state, action) => {
     case SACRIFICE: {
       const hpCost = sacrificeHpCost(state);
       if (state.hp < hpCost) return state;
-      const gain = sacrificeFaithGain(state);
+      const now = Date.now();
+      const newStreak = advanceStreak(state, now);
+      // Compute gain on a state that already reflects the new streak so the
+      // multiplier shows up on this very sacrifice.
+      const gain = sacrificeFaithGain({ ...state, streak: newStreak });
       const nextStep = state.tutorialStep === TUTORIAL.SACRIFICE ? TUTORIAL.GO_SOCIETY : state.tutorialStep;
       return {
         ...state,
@@ -387,6 +491,8 @@ export const reducer = (state, action) => {
         faith: state.faith + gain,
         totalFaithEarned: state.totalFaithEarned + gain,
         totalSacrifices: state.totalSacrifices + 1,
+        streak: newStreak,
+        lastSacrificeAt: now,
         tutorialStep: nextStep,
       };
     }

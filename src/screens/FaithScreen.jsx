@@ -3,7 +3,7 @@ import { Button } from '../components/Button/Button';
 import { N, formatNumber, formatRate } from '../components/Number';
 import { useGame } from '../context/GameContext';
 import { sacrifice, sacrificeMember } from '../game/actions';
-import { TUTORIAL } from '../game/constants';
+import { STREAK_MAX, STREAK_PER_STACK, TUTORIAL } from '../game/constants';
 import { MEMBERS } from '../data/members';
 import {
   hpRegenPerSec,
@@ -11,6 +11,7 @@ import {
   passiveFaithPerSec,
   sacrificeFaithGain,
   sacrificeHpCost,
+  streakStacks,
 } from '../game/selectors';
 import './FaithScreen.css';
 
@@ -72,6 +73,30 @@ export const FaithScreen = () => {
         </div>
 
         <div className="faith__altar">
+          {(() => {
+            const stacks = streakStacks(state);
+            const pct = Math.round(stacks * STREAK_PER_STACK * 100);
+            const fillPct = Math.round((stacks / STREAK_MAX) * 100);
+            return (
+              <div className={`faith__streak ${stacks > 0 ? 'faith__streak--on' : ''}`}>
+                <div className="faith__streak-row">
+                  <span className="faith__streak-lbl">Streak</span>
+                  <span className="faith__streak-val">×{stacks} <span className="faith__streak-mul">(+{pct}% faith)</span></span>
+                </div>
+                <div className="faith__streak-bar">
+                  <div className="faith__streak-fill" style={{ width: `${fillPct}%` }} />
+                </div>
+                <p className="faith__streak-hint">
+                  {stacks === 0
+                    ? `Sacrifice within ~3.5s to start a chain (max ×${STREAK_MAX}).`
+                    : stacks >= STREAK_MAX
+                      ? 'Maximum chain. Keep clicking — losing this hurts.'
+                      : 'Chain holds for ~3.5s after the last sacrifice.'}
+                </p>
+              </div>
+            );
+          })()}
+
           <Button
             variant="primary"
             size="lg"

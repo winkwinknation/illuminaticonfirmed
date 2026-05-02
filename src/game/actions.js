@@ -19,6 +19,8 @@ export const START_RIVALRY_MISSION = 'START_RIVALRY_MISSION';
 export const RESOLVE_RIVALRY_MISSIONS = 'RESOLVE_RIVALRY_MISSIONS';
 export const DISMISS_RIVALRY_RESULT = 'DISMISS_RIVALRY_RESULT';
 export const CLEAR_RIVALRY_LOG = 'CLEAR_RIVALRY_LOG';
+export const CLAIM_SIGIL = 'CLAIM_SIGIL';
+export const EXPIRE_SIGIL = 'EXPIRE_SIGIL';
 export const LOAD_GAME = 'LOAD_GAME';
 export const RESET = 'RESET';
 export const STAMP_SAVED = 'STAMP_SAVED';
@@ -45,6 +47,8 @@ export const startRivalryMission = (id) => ({ type: START_RIVALRY_MISSION, id })
 export const resolveRivalryMissions = (now = Date.now()) => ({ type: RESOLVE_RIVALRY_MISSIONS, now });
 export const dismissRivalryResult = (entryId) => ({ type: DISMISS_RIVALRY_RESULT, entryId });
 export const clearRivalryLog = () => ({ type: CLEAR_RIVALRY_LOG });
+export const claimSigil = () => ({ type: CLAIM_SIGIL });
+export const expireSigil = () => ({ type: EXPIRE_SIGIL });
 export const loadGame = (state) => ({ type: LOAD_GAME, state });
 export const reset = () => ({ type: RESET });
 export const stampSaved = (now) => ({ type: STAMP_SAVED, now });

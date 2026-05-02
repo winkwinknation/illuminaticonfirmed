@@ -58,6 +58,16 @@ const migrations = {
     if (state.rivalryTutorialDone == null) state.rivalryTutorialDone = false;
     return { ...blob, saveVersion: 5, state };
   },
+  5: (blob) => {
+    // v5 → v6: add streak + sigil state. Existing saves get neutral defaults
+    // — streak starts at 0, sigil scheduled to spawn shortly after load.
+    const state = { ...blob.state };
+    if (state.streak == null) state.streak = 0;
+    if (state.lastSacrificeAt == null) state.lastSacrificeAt = 0;
+    if (state.sigil === undefined) state.sigil = null;
+    if (state.nextSigilAt == null) state.nextSigilAt = Date.now() + 90_000;
+    return { ...blob, saveVersion: 6, state };
+  },
 };
 
 export const wrapSave = (state, now = Date.now()) => ({

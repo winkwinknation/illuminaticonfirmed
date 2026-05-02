@@ -10,6 +10,8 @@ import {
   OFFLINE_CAP_MS,
   ORDER_UNLOCK_KNOWLEDGE_COST,
   SACRIFICE_HP_COST,
+  STREAK_MAX,
+  STREAK_PER_STACK,
 } from './constants';
 import {
   costAt,
@@ -110,6 +112,24 @@ const missionRewardBoonMult = (state) => {
   return mult;
 };
 
+// ---------- Resonance + Streak (compulsion-loop multipliers) ----------
+
+// Resonance: every distinct upgrade you own contributes +1% to all gains.
+// Encourages spreading purchases across categories (instead of mashing one
+// stat) and gives "buying anything" a compounding global feel.
+export const distinctUpgradesOwned = (state) => {
+  let n = 0;
+  for (const v of Object.values(state.upgrades || {})) if (v > 0) n += 1;
+  return n;
+};
+
+export const resonanceMul = (state) => 1 + distinctUpgradesOwned(state) * 0.01;
+
+// Streak: faith multiplier when you chain sacrifices. Reducer maintains the
+// stack count in state.streak; this just translates it to a multiplier.
+export const streakStacks = (state) => Math.min(STREAK_MAX, state.streak || 0);
+export const streakMul = (state) => 1 + streakStacks(state) * STREAK_PER_STACK;
+
 // Multiplicative kind→multiplier from upgrades (e.g. Devotion category).
 // `kind` is the resource scope: 'faith' | 'money' | 'knowledge' | 'all' | 'mission' | 'passive'.
 const upgradeKindMul = (state, kind) => {
@@ -199,7 +219,18 @@ export const sacrificeFaithGain = (state) => {
   const boon = boonMult(state, { faith: true });
   const memberMult = memberKindMult(state, { faith: true });
   const devotion = upgradeKindMul(state, 'faith');
-  return Math.max(1, Math.floor((baseFaith + flatBonus) * mul * boon * memberMult * devotion));
+  return Math.max(
+    1,
+    Math.floor(
+      (baseFaith + flatBonus) *
+      mul *
+      boon *
+      memberMult *
+      devotion *
+      resonanceMul(state) *
+      streakMul(state)
+    )
+  );
 };
 
 export const sacrificeHpCost = () => SACRIFICE_HP_COST;
@@ -244,7 +275,8 @@ export const missionRewardMoney = (state, mission) => {
     boonMult(state, { money: true }) *
     memberKindMult(state, { money: true }) *
     missionRewardMult(state) *
-    upgradeKindMul(state, 'money')
+    upgradeKindMul(state, 'money') *
+    resonanceMul(state)
   );
 };
 
@@ -263,7 +295,8 @@ export const missionRewardKnowledge = (state, mission) => {
       boonMult(state, { knowledge: true }) *
       memberKindMult(state, { knowledge: true }) *
       missionRewardMult(state) *
-      upgradeKindMul(state, 'knowledge')
+      upgradeKindMul(state, 'knowledge') *
+      resonanceMul(state)
     )
   );
 };
@@ -276,7 +309,8 @@ export const missionRewardFaith = (state, mission) => {
     boonMult(state, { faith: true }) *
     memberKindMult(state, { faith: true }) *
     missionRewardMult(state) *
-    upgradeKindMul(state, 'faith')
+    upgradeKindMul(state, 'faith') *
+    resonanceMul(state)
   );
 };
 
@@ -302,7 +336,8 @@ export const passiveFaithPerSec = (state) => {
     memberKindMult(state, { faith: true }) *
     passiveBoonMult(state) *
     upgradeKindMul(state, 'passive') *
-    upgradeKindMul(state, 'faith');
+    upgradeKindMul(state, 'faith') *
+    resonanceMul(state);
 };
 
 export const passiveMoneyPerSec = (state) => {
@@ -312,7 +347,8 @@ export const passiveMoneyPerSec = (state) => {
     memberKindMult(state, { money: true }) *
     passiveBoonMult(state) *
     upgradeKindMul(state, 'passive') *
-    upgradeKindMul(state, 'money');
+    upgradeKindMul(state, 'money') *
+    resonanceMul(state);
 };
 
 export const passiveKnowledgePerSec = (state) => {
@@ -323,7 +359,8 @@ export const passiveKnowledgePerSec = (state) => {
     memberKindMult(state, { knowledge: true }) *
     passiveBoonMult(state) *
     upgradeKindMul(state, 'passive') *
-    upgradeKindMul(state, 'knowledge');
+    upgradeKindMul(state, 'knowledge') *
+    resonanceMul(state);
 };
 
 // ---------- Costs ----------

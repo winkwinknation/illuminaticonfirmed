@@ -4,6 +4,7 @@ import { BottomNav } from '../components/BottomNav/BottomNav';
 import { Button } from '../components/Button/Button';
 import { Modal } from '../components/Modal';
 import { formatDuration, formatNumber } from '../components/Number';
+import { Sigil } from '../components/Sigil';
 import { StatusBar } from '../components/StatusBar/StatusBar';
 import { Tutorial } from '../components/Tutorial';
 import { GameProvider, useGame } from '../context/GameContext';
@@ -118,6 +119,7 @@ const InnerShell = ({ slotId }) => {
       </main>
       <BottomNav />
       <OfflineToast />
+      <Sigil />
       <Tutorial />
     </div>
   );
