@@ -16,7 +16,7 @@ export const StatusBar = () => {
           value={state.hp}
           max={cap}
           color="var(--hp)"
-          label={`HP ${formatNumber(state.hp, 2, 0)} / ${formatNumber(cap, 2, 0)}`}
+          label={`HP ${formatNumber(state.hp)} / ${formatNumber(cap)}`}
           height={16}
         />
       </div>

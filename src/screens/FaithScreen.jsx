@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '../components/Button/Button';
-import { N, formatRate } from '../components/Number';
+import { N, formatNumber, formatRate } from '../components/Number';
 import { useGame } from '../context/GameContext';
 import { sacrifice, sacrificeMember } from '../game/actions';
 import { TUTORIAL } from '../game/constants';
@@ -35,13 +35,13 @@ export const FaithScreen = () => {
   const onSacrifice = () => {
     if (tooLow) return;
     dispatch(sacrifice());
-    popFloat(`+${faithGain}`);
+    popFloat(`+${formatNumber(faithGain)}`);
   };
 
   const onSacrificeMember = (member) => {
     const gain = memberSacrificeFaith(state, member);
     dispatch(sacrificeMember(member.id));
-    popFloat(`+${gain}`);
+    popFloat(`+${formatNumber(gain)}`);
   };
 
   return (
@@ -59,7 +59,7 @@ export const FaithScreen = () => {
           </div>
           <div className="readout">
             <span className="readout__lbl">HP cost</span>
-            <span className="readout__val"><N value={hpCost} placesUnder1000={0} /> HP</span>
+            <span className="readout__val"><N value={hpCost} /> HP</span>
           </div>
           <div className="readout">
             <span className="readout__lbl">Regen</span>
@@ -79,7 +79,7 @@ export const FaithScreen = () => {
             onClick={onSacrifice}
             className={`faith__btn ${state.tutorialStep === TUTORIAL.SACRIFICE ? 'tut-glow' : ''}`}
           >
-            Sacrifice <N value={hpCost} placesUnder1000={0} /> HP → +<N value={faithGain} placesUnder1000={0} /> Faith
+            Sacrifice <N value={hpCost} /> HP → +<N value={faithGain} /> Faith
           </Button>
 
           <div className="faith__floats" aria-hidden="true">
