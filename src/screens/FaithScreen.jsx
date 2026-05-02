@@ -59,7 +59,7 @@ export const FaithScreen = () => {
           </div>
           <div className="readout">
             <span className="readout__lbl">HP cost</span>
-            <span className="readout__val">{hpCost} HP</span>
+            <span className="readout__val"><N value={hpCost} placesUnder1000={0} /> HP</span>
           </div>
           <div className="readout">
             <span className="readout__lbl">Regen</span>
@@ -79,7 +79,7 @@ export const FaithScreen = () => {
             onClick={onSacrifice}
             className={`faith__btn ${state.tutorialStep === TUTORIAL.SACRIFICE ? 'tut-glow' : ''}`}
           >
-            Sacrifice 25 HP → +{faithGain} Faith
+            Sacrifice <N value={hpCost} placesUnder1000={0} /> HP → +<N value={faithGain} placesUnder1000={0} /> Faith
           </Button>
 
           <div className="faith__floats" aria-hidden="true">

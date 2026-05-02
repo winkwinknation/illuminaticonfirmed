@@ -191,7 +191,7 @@ const ResultEntry = ({ entry, onDismiss }) => {
             {losses.soldier > 0 && <>−{losses.soldier} soldier{losses.soldier === 1 ? '' : 's'} </>}
             {losses.spy > 0 && <>−{losses.spy} spy{losses.spy === 1 ? '' : ' (multiple)'} </>}
             {losses.war_engine > 0 && <>−{losses.war_engine} war engine{losses.war_engine === 1 ? '' : 's'} </>}
-            {entry.hpDrain > 0 && <span style={{ color: 'var(--hp)' }}>−{entry.hpDrain} HP </span>}
+            {entry.hpDrain > 0 && <span style={{ color: 'var(--hp)' }}>−<N value={entry.hpDrain} placesUnder1000={0} /> HP </span>}
           </span>
         ) : null}
       </div>

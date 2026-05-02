@@ -51,7 +51,7 @@ const MissionCard = ({ mission, glow }) => {
 
       <ul className="mission__cost">
         <li>−<N value={mission.cost.faith || 0} /> faith</li>
-        {hpCost > 0 && <li>−{hpCost} HP</li>}
+        {hpCost > 0 && <li>−<N value={hpCost} placesUnder1000={0} /> HP</li>}
       </ul>
       <ul className="mission__rew">
         {moneyReward > 0 && <li>+<N value={moneyReward} /> money</li>}

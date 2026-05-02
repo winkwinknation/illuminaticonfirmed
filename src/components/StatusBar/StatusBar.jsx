@@ -1,7 +1,7 @@
 import React from 'react';
 import { useGame } from '../../context/GameContext';
 import { maxHp } from '../../game/selectors';
-import { N } from '../Number';
+import { formatNumber, N } from '../Number';
 import { ProgressBar } from '../ProgressBar/ProgressBar';
 import './StatusBar.css';
 
@@ -16,7 +16,7 @@ export const StatusBar = () => {
           value={state.hp}
           max={cap}
           color="var(--hp)"
-          label={`HP ${Math.floor(state.hp)} / ${cap}`}
+          label={`HP ${formatNumber(state.hp, 2, 0)} / ${formatNumber(cap, 2, 0)}`}
           height={16}
         />
       </div>
