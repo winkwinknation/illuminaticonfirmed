@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useGame } from '../../context/GameContext';
 import { TUTORIAL } from '../../game/constants';
-import { canPrestige, canUnlockOrder } from '../../game/selectors';
+import { canUnlockOrder, hasActionableSecrets } from '../../game/selectors';
 import './BottomNav.css';
 
 const TABS = [
@@ -23,7 +23,10 @@ const tutorialTargetTab = (step) => {
 
 export const BottomNav = () => {
   const { state } = useGame();
-  const knowledgeReady = canPrestige(state) || state.prestigeLevel > 0 || state.secretKnowledge > 0;
+  // Pulse the Secrets dot only when there's something the player can act on
+  // — prestige available, an unrevealed boon affordable, or a deepenable boon.
+  // Otherwise it would stay lit forever after the first prestige.
+  const knowledgeReady = hasActionableSecrets(state);
   const orderReady = canUnlockOrder(state);
   const orderLocked = !state.orderUnlocked;
   const tutTab = tutorialTargetTab(state.tutorialStep);

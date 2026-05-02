@@ -19,6 +19,7 @@ import {
   prestigeFaithThreshold,
   prestigeKnowledgeThreshold,
   prestigeMoneyThreshold,
+  revealBoonCost,
   skFromTotalMoney,
 } from './formulas';
 
@@ -577,6 +578,23 @@ export const canAffordBoon = (state, boon) => {
   if (boon.maxOwned && owned >= boon.maxOwned) return false;
   if (owned <= 0) return false; // must reveal first
   return state.secretKnowledge >= boonCost(state, boon);
+};
+
+// Used by the BottomNav to decide whether to pulse the Secrets dot. We only
+// want the badge when there's something the player can act on right now —
+// prestige is available, an unrevealed boon can be afforded, or a revealed
+// boon can be deepened. (Don't pulse forever just because they've prestiged.)
+export const hasActionableSecrets = (state) => {
+  if (canPrestige(state)) return true;
+  const unrevealed = unrevealedBoonIds(state);
+  if (unrevealed.length > 0) {
+    const cost = revealBoonCost(revealedBoonCount(state));
+    if ((state.secretKnowledge || 0) >= cost) return true;
+  }
+  for (const b of Object.values(BOONS_BY_ID)) {
+    if (canAffordBoon(state, b)) return true;
+  }
+  return false;
 };
 
 // ---------- Offline cap ----------
