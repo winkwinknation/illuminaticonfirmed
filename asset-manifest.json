@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/illuminaticonfirmed/static/css/main.4af46c14.css",
-    "main.js": "/illuminaticonfirmed/static/js/main.d07b173b.js",
+    "main.js": "/illuminaticonfirmed/static/js/main.08024f39.js",
     "index.html": "/illuminaticonfirmed/index.html",
     "main.4af46c14.css.map": "/illuminaticonfirmed/static/css/main.4af46c14.css.map",
-    "main.d07b173b.js.map": "/illuminaticonfirmed/static/js/main.d07b173b.js.map"
+    "main.08024f39.js.map": "/illuminaticonfirmed/static/js/main.08024f39.js.map"
   },
   "entrypoints": [
     "static/css/main.4af46c14.css",
-    "static/js/main.d07b173b.js"
+    "static/js/main.08024f39.js"
   ]
 }
