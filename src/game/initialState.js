@@ -66,7 +66,10 @@ export const makeNewGameWithBoons = (carryOver, now = Date.now()) => ({
   unlockedLore: carryOver.unlockedLore,
   createdAt: carryOver.createdAt,
   playtimeMs: carryOver.playtimeMs,
-  orderUnlocked: carryOver.orderUnlocked,
+  // Intentionally NOT carrying orderUnlocked — each prestige requires re-paying
+  // the knowledge cost to inaugurate the Order again, which keeps the Order
+  // and Rivals tabs as a meaningful mid-run milestone every cycle.
+  orderUnlocked: false,
   tutorialStep: carryOver.tutorialStep,
   orderTutorialDone: carryOver.orderTutorialDone,
   rivalryTutorialDone: carryOver.rivalryTutorialDone,

@@ -15,6 +15,14 @@
 //
 // `tier` controls display order. `unlock` is interpreted by selectors.isUnlocked
 // and is implicitly ANDed with the global Order knowledge gate (orderUnlocked).
+//
+// Threshold note: by the time the player has accumulated 100 knowledge to
+// inaugurate the Order, they typically already have hundreds of missions and
+// sacrifices, multiple thousands of money/faith earned. The unlocks below are
+// sized to live BEYOND those values — a freshly-opened Order shows the
+// Acolyte (and the Soldier on the war roster), with everything else gated
+// behind continued play. Lifetime stats reset on prestige, so each run also
+// has to re-earn its way through the roster.
 
 export const MEMBERS = [
   // ---------- Active members ----------
@@ -37,7 +45,7 @@ export const MEMBERS = [
     maxOwned: 15,
     behavior: { kind: 'autoMission', missionId: 'barter_market' },
     tier: 2,
-    unlock: [{ kind: 'totalMoneyEarned', n: 250 }],
+    unlock: [{ kind: 'totalMoneyEarned', n: 25000 }],
   },
   {
     id: 'eavesdropper',
@@ -48,7 +56,7 @@ export const MEMBERS = [
     maxOwned: 15,
     behavior: { kind: 'autoMission', missionId: 'rumor_tavern' },
     tier: 3,
-    unlock: [{ kind: 'totalKnowledgeEarned', n: 5 }, { kind: 'memberOwned', id: 'hawker', n: 1 }],
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 800 }, { kind: 'memberOwned', id: 'hawker', n: 1 }],
   },
   {
     id: 'enforcer',
@@ -60,8 +68,8 @@ export const MEMBERS = [
     behavior: { kind: 'autoMission', missionId: 'danger_heist', minHpFraction: 0.6 },
     tier: 5,
     unlock: [
-      { kind: 'totalMoneyEarned', n: 2000 },
-      { kind: 'totalMissions', n: 15 },
+      { kind: 'totalMoneyEarned', n: 100000 },
+      { kind: 'totalMissions', n: 250 },
     ],
   },
   {
@@ -73,7 +81,7 @@ export const MEMBERS = [
     maxOwned: 10,
     behavior: { kind: 'autoMission', missionId: 'rumor_archive', minHpFraction: 0.4 },
     tier: 7,
-    unlock: [{ kind: 'totalKnowledgeEarned', n: 80 }, { kind: 'memberOwned', id: 'eavesdropper', n: 1 }],
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 3000 }, { kind: 'memberOwned', id: 'eavesdropper', n: 1 }],
   },
   {
     id: 'steward',
@@ -84,7 +92,7 @@ export const MEMBERS = [
     maxOwned: 5,
     behavior: { kind: 'autoBuyUpgrade', intervalMs: 6000 },
     tier: 6,
-    unlock: [{ kind: 'totalMoneyEarned', n: 6000 }, { kind: 'totalMissions', n: 25 }],
+    unlock: [{ kind: 'totalMoneyEarned', n: 200000 }, { kind: 'totalMissions', n: 400 }],
   },
 
   // ---------- Passive members ----------
@@ -97,7 +105,7 @@ export const MEMBERS = [
     maxOwned: 25,
     effect: { kind: 'addHpRegen', perLevel: 0.4 },
     tier: 2,
-    unlock: [{ kind: 'totalSacrifices', n: 10 }],
+    unlock: [{ kind: 'totalSacrifices', n: 250 }],
   },
   {
     id: 'cantor',
@@ -108,7 +116,7 @@ export const MEMBERS = [
     maxOwned: 20,
     effect: { kind: 'multAllFaith', perLevel: 0.15 },
     tier: 4,
-    unlock: [{ kind: 'totalFaithEarned', n: 250 }],
+    unlock: [{ kind: 'totalFaithEarned', n: 4000 }],
   },
   {
     id: 'treasurer',
@@ -119,7 +127,7 @@ export const MEMBERS = [
     maxOwned: 20,
     effect: { kind: 'multAllMoney', perLevel: 0.18 },
     tier: 4,
-    unlock: [{ kind: 'totalMoneyEarned', n: 1500 }],
+    unlock: [{ kind: 'totalMoneyEarned', n: 40000 }],
   },
   {
     id: 'cryptographer',
@@ -130,7 +138,7 @@ export const MEMBERS = [
     maxOwned: 20,
     effect: { kind: 'multAllKnowledge', perLevel: 0.18 },
     tier: 5,
-    unlock: [{ kind: 'totalKnowledgeEarned', n: 30 }],
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 1500 }],
   },
   {
     id: 'diplomat',
@@ -141,7 +149,7 @@ export const MEMBERS = [
     maxOwned: 12,
     effect: { kind: 'multAllMissionRewards', perLevel: 0.22 },
     tier: 6,
-    unlock: [{ kind: 'totalMissions', n: 30 }],
+    unlock: [{ kind: 'totalMissions', n: 350 }, { kind: 'totalMoneyEarned', n: 80000 }],
   },
   {
     id: 'archivist',
@@ -152,7 +160,7 @@ export const MEMBERS = [
     maxOwned: 15,
     effect: { kind: 'addPassiveKnowledge', perLevel: 0.06 },
     tier: 7,
-    unlock: [{ kind: 'totalKnowledgeEarned', n: 120 }, { kind: 'memberOwned', id: 'cryptographer', n: 1 }],
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 5000 }, { kind: 'memberOwned', id: 'cryptographer', n: 1 }],
   },
   {
     id: 'patriarch',
@@ -174,7 +182,7 @@ export const MEMBERS = [
     maxOwned: 8,
     behavior: { kind: 'autoMission', missionId: 'danger_assassinate', minHpFraction: 0.6 },
     tier: 9,
-    unlock: [{ kind: 'totalMissions', n: 100 }, { kind: 'memberOwned', id: 'enforcer', n: 3 }],
+    unlock: [{ kind: 'totalMissions', n: 600 }, { kind: 'memberOwned', id: 'enforcer', n: 3 }],
   },
   {
     id: 'oracle',
@@ -185,7 +193,7 @@ export const MEMBERS = [
     maxOwned: 8,
     behavior: { kind: 'autoMission', missionId: 'rumor_oracle', minHpFraction: 0.3 },
     tier: 10,
-    unlock: [{ kind: 'totalKnowledgeEarned', n: 2000 }, { kind: 'memberOwned', id: 'archivist', n: 1 }],
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 8000 }, { kind: 'memberOwned', id: 'archivist', n: 1 }],
   },
   {
     id: 'matriarch',
@@ -222,7 +230,7 @@ export const MEMBERS = [
     maxOwned: 60,
     unitKind: 'spy',
     tier: 2,
-    unlock: [{ kind: 'orderUnlocked' }, { kind: 'totalKnowledgeEarned', n: 120 }],
+    unlock: [{ kind: 'orderUnlocked' }, { kind: 'totalKnowledgeEarned', n: 1500 }],
   },
   {
     id: 'war_engine',
@@ -236,7 +244,7 @@ export const MEMBERS = [
     unlock: [
       { kind: 'orderUnlocked' },
       { kind: 'memberOwned', id: 'soldier', n: 5 },
-      { kind: 'totalKnowledgeEarned', n: 200 },
+      { kind: 'totalKnowledgeEarned', n: 4000 },
     ],
   },
 ];
