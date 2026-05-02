@@ -1,6 +1,7 @@
 import { BOONS_BY_ID, boonCostAt } from '../data/boons';
 import { MEMBERS, MEMBERS_BY_ID } from '../data/members';
 import { MISSIONS, MISSIONS_BY_ID } from '../data/missions';
+import { RIVALRY_MISSIONS, RIVALRY_MISSIONS_BY_ID } from '../data/rivalryMissions';
 import { UPGRADES, UPGRADES_BY_ID } from '../data/upgrades';
 import {
   BASE_HP_REGEN,
@@ -320,6 +321,8 @@ export const checkCondition = (state, cond) => {
       return (state.prestigeLevel || 0) >= cond.n;
     case 'orderUnlocked':
       return !!state.orderUnlocked;
+    case 'totalRivalryWins':
+      return (state.totalRivalryWins || 0) >= cond.n;
     default:
       return true;
   }
@@ -351,6 +354,8 @@ const conditionLabel = (cond) => {
       return `Ascend ${cond.n} time${cond.n === 1 ? '' : 's'}`;
     case 'orderUnlocked':
       return 'Inaugurate the Order';
+    case 'totalRivalryWins':
+      return `${cond.n} rivalry victor${cond.n === 1 ? 'y' : 'ies'}`;
     default:
       return '';
   }
@@ -479,3 +484,46 @@ export const getMission = (id) => MISSIONS_BY_ID[id];
 export const getUpgrade = (id) => UPGRADES_BY_ID[id];
 export const getBoon = (id) => BOONS_BY_ID[id];
 export const getMember = (id) => MEMBERS_BY_ID[id];
+export const getRivalryMission = (id) => RIVALRY_MISSIONS_BY_ID[id];
+
+// ---------- Rivalry ----------
+
+export const rivalryRunInfo = (state, mission) =>
+  (state.runningRivalry || {})[mission.id] || null;
+
+export const isRivalryRunning = (state, mission, now = Date.now()) => {
+  const run = rivalryRunInfo(state, mission);
+  return !!run && run.endsAt > now;
+};
+
+export const rivalryRemainingMs = (state, mission, now = Date.now()) => {
+  const run = rivalryRunInfo(state, mission);
+  return run ? Math.max(0, run.endsAt - now) : 0;
+};
+
+const unitsAvailable = (state) => ({
+  soldier: memberOwned(state, 'soldier'),
+  spy: memberOwned(state, 'spy'),
+  war_engine: memberOwned(state, 'war_engine'),
+});
+
+export const canAffordRivalry = (state, mission) => {
+  if (!state.orderUnlocked) return false;
+  if (!isUnlocked(state, mission)) return false;
+  const need = (mission.cost && mission.cost.units) || {};
+  const have = unitsAvailable(state);
+  for (const k of Object.keys(need)) {
+    if ((have[k] || 0) < need[k]) return false;
+  }
+  return true;
+};
+
+export const visibleRivalryMissions = (state) => {
+  if (!state.orderUnlocked) return [];
+  return RIVALRY_MISSIONS.filter((m) => isUnlocked(state, m)).slice().sort(byTier);
+};
+export const nextLockedRivalryMission = (state) => {
+  if (!state.orderUnlocked) return null;
+  const locked = RIVALRY_MISSIONS.filter((m) => !isUnlocked(state, m)).sort(byTier);
+  return locked[0] || null;
+};

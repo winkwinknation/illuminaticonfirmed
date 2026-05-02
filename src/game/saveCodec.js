@@ -35,6 +35,29 @@ const migrations = {
     delete state.tutorialDone;
     return { ...blob, saveVersion: 4, state };
   },
+  4: (blob) => {
+    // v4 → v5: rename auto-tavern member 'spy' → 'eavesdropper' (the new
+    // 'spy' id is now a roster combat unit). Add rivalry state and one-shot
+    // tutorial flags. Returning Order players skip the Order intro modal.
+    const state = { ...blob.state };
+    if (state.members && Object.prototype.hasOwnProperty.call(state.members, 'spy')) {
+      state.members = { ...state.members };
+      state.members.eavesdropper = (state.members.eavesdropper || 0) + state.members.spy;
+      delete state.members.spy;
+    }
+    if (state.runningRivalry == null) state.runningRivalry = {};
+    if (state.rivalryLog == null) state.rivalryLog = [];
+    if (state.totalRivalryWins == null) state.totalRivalryWins = 0;
+    if (state.totalRivalryLosses == null) state.totalRivalryLosses = 0;
+    if (state.totalSoldiersLost == null) state.totalSoldiersLost = 0;
+    if (state.totalSpiesLost == null) state.totalSpiesLost = 0;
+    if (state.totalEnginesLost == null) state.totalEnginesLost = 0;
+    if (state.orderTutorialDone == null) {
+      state.orderTutorialDone = !!state.orderUnlocked;
+    }
+    if (state.rivalryTutorialDone == null) state.rivalryTutorialDone = false;
+    return { ...blob, saveVersion: 5, state };
+  },
 };
 
 export const wrapSave = (state, now = Date.now()) => ({

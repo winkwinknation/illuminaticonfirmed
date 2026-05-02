@@ -1,4 +1,4 @@
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export const TICK_MS = 100;
 export const AUTOSAVE_MS = 3000;

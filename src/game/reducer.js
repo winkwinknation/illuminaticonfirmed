@@ -4,23 +4,30 @@ import {
   AUTO_FIRE,
   BUY_BOON,
   BUY_UPGRADE,
+  CLEAR_RIVALRY_LOG,
+  COMPLETE_ORDER_TUTORIAL,
+  COMPLETE_RIVALRY_TUTORIAL,
   COMPLETE_TUTORIAL,
+  DISMISS_RIVALRY_RESULT,
   LOAD_GAME,
   PRESTIGE,
   RECRUIT_MEMBER,
   RESET,
   RESOLVE_MISSIONS,
+  RESOLVE_RIVALRY_MISSIONS,
   REVEAL_BOON,
   SACRIFICE,
   SACRIFICE_MEMBER,
   SET_TUTORIAL_STEP,
   STAMP_SAVED,
   START_MISSION,
+  START_RIVALRY_MISSION,
   TICK,
   UNLOCK_LORE,
   UNLOCK_ORDER,
 } from './actions';
 import { ORDER_UNLOCK_KNOWLEDGE_COST, TUTORIAL } from './constants';
+import { RIVALRY_MISSIONS_BY_ID } from '../data/rivalryMissions';
 import { clamp, revealBoonCost } from './formulas';
 import { makeNewGame, makeNewGameWithBoons } from './initialState';
 import {
@@ -33,6 +40,7 @@ import {
   canAffordBoon,
   canAffordMember,
   canAffordMission,
+  canAffordRivalry,
   canAffordUpgrade,
   canPrestige,
   getBoon,
@@ -134,6 +142,151 @@ const resolveDueMissions = (state, now = Date.now()) => {
   return { ...next, runningMissions: nextRunning, totalMissions };
 };
 
+const randInt = (min, max) => {
+  if (min === max) return min;
+  return Math.floor(min + Math.random() * (max - min + 1));
+};
+
+const decrementMember = (members, id, n) => {
+  const cur = members[id] || 0;
+  const next = Math.max(0, cur - n);
+  const out = { ...members };
+  if (next <= 0) delete out[id];
+  else out[id] = next;
+  return out;
+};
+
+const incrementMember = (members, id, n) => {
+  if (!n) return members;
+  const cur = members[id] || 0;
+  return { ...members, [id]: cur + n };
+};
+
+const RIVALRY_LOG_MAX = 20;
+
+const startRivalryMission = (state, mission) => {
+  if ((state.runningRivalry || {})[mission.id]) return state;
+  if (!canAffordRivalry(state, mission)) return state;
+  const need = (mission.cost && mission.cost.units) || {};
+  // Reserve units up-front by removing them from the member pool. Survivors
+  // are added back when the mission resolves; lost units stay deducted.
+  let members = state.members || {};
+  const committed = {};
+  for (const id of Object.keys(need)) {
+    const n = need[id];
+    members = decrementMember(members, id, n);
+    committed[id] = n;
+  }
+  return {
+    ...state,
+    members,
+    runningRivalry: {
+      ...(state.runningRivalry || {}),
+      [mission.id]: {
+        startedAt: Date.now(),
+        endsAt: Date.now() + mission.durationMs,
+        units: committed,
+      },
+    },
+  };
+};
+
+const resolveRivalryMission = (state, mission, run, now) => {
+  const success = Math.random() < (mission.successChance ?? 0.5);
+  const committed = run.units || {};
+  let members = state.members || {};
+
+  let moneyGain = 0;
+  let faithGain = 0;
+  let knowledgeGain = 0;
+  let hpDrain = 0;
+  const lossesApplied = { soldier: 0, spy: 0, war_engine: 0 };
+
+  if (success) {
+    // Return all committed units to the pool, then layer rewards.
+    for (const id of Object.keys(committed)) {
+      members = incrementMember(members, id, committed[id]);
+    }
+    const r = mission.rewardOnSuccess || {};
+    if (r.money) moneyGain = randInt(r.money[0], r.money[1]);
+    if (r.faith) faithGain = randInt(r.faith[0], r.faith[1]);
+    if (r.knowledge) knowledgeGain = randInt(r.knowledge[0], r.knowledge[1]);
+  } else {
+    // Compute losses (clamped to what was actually committed); survivors return.
+    const lossSpec = mission.losses || {};
+    for (const id of Object.keys(committed)) {
+      const sent = committed[id];
+      const range = lossSpec[id];
+      const lost = range ? Math.min(sent, randInt(range[0], range[1])) : 0;
+      const survivors = sent - lost;
+      lossesApplied[id] = lost;
+      if (survivors > 0) members = incrementMember(members, id, survivors);
+    }
+    if (mission.kind === 'espionage' && mission.hpDrainOnFail) {
+      hpDrain = randInt(mission.hpDrainOnFail[0], mission.hpDrainOnFail[1]);
+    }
+  }
+
+  const cap = maxHp({ ...state, members });
+  const nextHp = Math.max(0, Math.min(cap, state.hp - hpDrain));
+
+  const entry = {
+    id: `${mission.id}_${now}`,
+    missionId: mission.id,
+    missionName: mission.name,
+    rivalId: mission.rivalId,
+    kind: mission.kind,
+    success,
+    rewards: { money: moneyGain, faith: faithGain, knowledge: knowledgeGain },
+    losses: lossesApplied,
+    hpDrain,
+    at: now,
+  };
+
+  const log = [entry, ...(state.rivalryLog || [])].slice(0, RIVALRY_LOG_MAX);
+  const nextRunning = { ...(state.runningRivalry || {}) };
+  delete nextRunning[mission.id];
+
+  return {
+    ...state,
+    members,
+    hp: nextHp,
+    money: state.money + moneyGain,
+    faith: state.faith + faithGain,
+    knowledge: state.knowledge + knowledgeGain,
+    totalMoneyEarned: state.totalMoneyEarned + moneyGain,
+    totalFaithEarned: state.totalFaithEarned + faithGain,
+    totalKnowledgeEarned: (state.totalKnowledgeEarned || 0) + knowledgeGain,
+    totalRivalryWins: (state.totalRivalryWins || 0) + (success ? 1 : 0),
+    totalRivalryLosses: (state.totalRivalryLosses || 0) + (success ? 0 : 1),
+    totalSoldiersLost: (state.totalSoldiersLost || 0) + lossesApplied.soldier,
+    totalSpiesLost: (state.totalSpiesLost || 0) + lossesApplied.spy,
+    totalEnginesLost: (state.totalEnginesLost || 0) + lossesApplied.war_engine,
+    runningRivalry: nextRunning,
+    rivalryLog: log,
+  };
+};
+
+const resolveDueRivalryMissions = (state, now = Date.now()) => {
+  const running = state.runningRivalry || {};
+  const ids = Object.keys(running);
+  if (ids.length === 0) return state;
+  let next = state;
+  for (const id of ids) {
+    const run = (next.runningRivalry || {})[id];
+    if (!run || run.endsAt > now) continue;
+    const mission = RIVALRY_MISSIONS_BY_ID[id];
+    if (!mission) {
+      const nextRunning = { ...(next.runningRivalry || {}) };
+      delete nextRunning[id];
+      next = { ...next, runningRivalry: nextRunning };
+      continue;
+    }
+    next = resolveRivalryMission(next, mission, run, now);
+  }
+  return next;
+};
+
 const startMission = (state, mission) => {
   if (isMissionRunning(state, mission)) return state;
   if (!canAffordMission(state, mission)) return state;
@@ -157,7 +310,7 @@ export const reducer = (state, action) => {
   switch (action.type) {
     case TICK: {
       const ticked = applyTimeDelta(state, action.dtMs);
-      return resolveDueMissions(ticked);
+      return resolveDueRivalryMissions(resolveDueMissions(ticked));
     }
 
     case APPLY_OFFLINE: {
@@ -178,6 +331,7 @@ export const reducer = (state, action) => {
       const upgradesAfter = countUpgrades(next.upgrades);
       // Resolve any explicit player-started missions whose timers expired.
       next = resolveDueMissions(next);
+      next = resolveDueRivalryMissions(next);
       const summary = {
         dtMs: action.dtMs,
         sacrifices: work.sacrifices,
@@ -196,6 +350,25 @@ export const reducer = (state, action) => {
 
     case RESOLVE_MISSIONS: {
       return resolveDueMissions(state, action.now);
+    }
+
+    case RESOLVE_RIVALRY_MISSIONS: {
+      return resolveDueRivalryMissions(state, action.now);
+    }
+
+    case START_RIVALRY_MISSION: {
+      const mission = RIVALRY_MISSIONS_BY_ID[action.id];
+      if (!mission) return state;
+      return startRivalryMission(state, mission);
+    }
+
+    case DISMISS_RIVALRY_RESULT: {
+      const log = (state.rivalryLog || []).filter((e) => e.id !== action.entryId);
+      return { ...state, rivalryLog: log };
+    }
+
+    case CLEAR_RIVALRY_LOG: {
+      return { ...state, rivalryLog: [] };
     }
 
     case STAMP_SAVED: {
@@ -289,6 +462,8 @@ export const reducer = (state, action) => {
         playtimeMs: state.playtimeMs,
         orderUnlocked: state.orderUnlocked,
         tutorialStep: state.tutorialStep,
+        orderTutorialDone: state.orderTutorialDone,
+        rivalryTutorialDone: state.rivalryTutorialDone,
       };
       const fresh = makeNewGameWithBoons(carryOver);
       return {
@@ -354,6 +529,16 @@ export const reducer = (state, action) => {
     case COMPLETE_TUTORIAL: {
       if (state.tutorialStep === TUTORIAL.DONE) return state;
       return { ...state, tutorialStep: TUTORIAL.DONE };
+    }
+
+    case COMPLETE_ORDER_TUTORIAL: {
+      if (state.orderTutorialDone) return state;
+      return { ...state, orderTutorialDone: true };
+    }
+
+    case COMPLETE_RIVALRY_TUTORIAL: {
+      if (state.rivalryTutorialDone) return state;
+      return { ...state, rivalryTutorialDone: true };
     }
 
     case LOAD_GAME: {

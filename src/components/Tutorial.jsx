@@ -3,7 +3,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './Button/Button';
 import { Modal } from './Modal';
 import { useGame } from '../context/GameContext';
-import { completeTutorial, setTutorialStep } from '../game/actions';
+import {
+  completeOrderTutorial,
+  completeRivalryTutorial,
+  completeTutorial,
+  setTutorialStep,
+} from '../game/actions';
 import { TUTORIAL } from '../game/constants';
 import './Tutorial.css';
 
@@ -14,9 +19,9 @@ import './Tutorial.css';
 //   3. Reducer-side advancement: SACRIFICE / START_MISSION / BUY_UPGRADE bump
 //      the step on success. PlayLayout-side route watching covers tab visits.
 //
-// Visual highlight (pulsing border on the relevant nav button or action card)
-// is done by the consuming screens reading state.tutorialStep directly. This
-// component just orchestrates step transitions and renders the prompts.
+// In addition, two one-shot intro modals fire the first time the player visits
+// the Order or Rivals tabs after they unlock. These are independent of the
+// linear tutorialStep flow above and use their own boolean flags.
 
 const HINTS = {
   [TUTORIAL.SACRIFICE]: {
@@ -79,6 +84,72 @@ const ClosingModal = ({ onDone }) => (
   </Modal>
 );
 
+const OrderIntroModal = ({ onDone }) => (
+  <Modal
+    open
+    onClose={onDone}
+    title="The Order Opens"
+    footer={<Button variant="primary" size="sm" onClick={onDone}>Understood</Button>}
+  >
+    <p>The order keeps three kinds of members. Each has their place.</p>
+    <ul className="tut__list">
+      <li>
+        <span className="tut__pip" data-kind="faith">☩</span>{' '}
+        <strong>Active Hands</strong> — Acolytes, Hawkers, Eavesdroppers, and the like.
+        While the game is open, they sacrifice or run missions on your behalf.
+      </li>
+      <li>
+        <span className="tut__pip" data-kind="knowledge">⌬</span>{' '}
+        <strong>Quiet Influence</strong> — Cantors, Treasurers, Diplomats. They do not act,
+        but their presence multiplies your gains. They earn while you sleep.
+      </li>
+      <li>
+        <span className="tut__pip" data-kind="money">⚔</span>{' '}
+        <strong>War Roster</strong> — Soldiers, Spies, and War Engines. They do nothing on this
+        screen. They exist to be <em>spent</em> on the new <strong>Rivals</strong> tab.
+      </li>
+    </ul>
+    <p className="tut__hint">
+      Recruit a Hawker first — it pays for itself. The War Roster is for once you are
+      ready to make enemies.
+    </p>
+  </Modal>
+);
+
+const RivalryIntroModal = ({ onDone }) => (
+  <Modal
+    open
+    onClose={onDone}
+    title="Rivals of the Order"
+    footer={<Button variant="primary" size="sm" onClick={onDone}>So be it</Button>}
+  >
+    <p>
+      Other orders walk the world: the Crimson Brotherhood, the Iron Lodge, the Pale Court,
+      the Glass Cabal. They are not idle. Neither, now, are you.
+    </p>
+    <p>
+      Two campaigns are open to you here:
+    </p>
+    <ul className="tut__list">
+      <li>
+        <strong style={{ color: 'var(--hp)' }}>Direct Conflict</strong> — Send Soldiers
+        (and, later, War Engines) against rival strongholds. Success returns coin, faith,
+        and sometimes knowledge. Failure costs lives.
+      </li>
+      <li>
+        <strong style={{ color: 'var(--knowledge)' }}>Espionage</strong> — Send Spies
+        to infiltrate, steal, and unmask. Success grants knowledge and faith. Failure costs
+        the spy and a measure of your own HP.
+      </li>
+    </ul>
+    <p className="tut__hint">
+      Outcomes are random within a stated range. Your roster is finite — Soldiers, Spies, and
+      War Engines committed to a campaign are not always returned. Every skirmish is logged
+      on this screen so you can mourn or celebrate properly.
+    </p>
+  </Modal>
+);
+
 const Hint = ({ step, onSkip }) => {
   const h = HINTS[step];
   if (!h) return null;
@@ -108,26 +179,50 @@ export const Tutorial = () => {
     }
   }, [step, location.pathname, dispatch]);
 
-  if (step === TUTORIAL.DONE) return null;
+  // Order intro modal: shown the first time the player visits Order *after*
+  // it's been inaugurated. Independent of the main tutorial flow.
+  const showOrderIntro =
+    state.orderUnlocked &&
+    !state.orderTutorialDone &&
+    location.pathname === '/play/order';
 
-  const skip = () => dispatch(completeTutorial());
+  // Rivalry intro modal: shown the first time the player visits Rivals.
+  // Implicitly requires orderUnlocked since Rivals shares that gate.
+  const showRivalryIntro =
+    state.orderUnlocked &&
+    !state.rivalryTutorialDone &&
+    location.pathname === '/play/rivals';
 
-  if (step === TUTORIAL.WELCOME) {
-    return (
-      <WelcomeModal
-        onBegin={() => {
-          // Make sure we're on /play/faith before pointing at the altar.
-          if (location.pathname !== '/play/faith') navigate('/play/faith');
-          dispatch(setTutorialStep(TUTORIAL.SACRIFICE));
-        }}
-        onSkip={skip}
-      />
-    );
+  // Main tutorial bookends and hints take precedence; only one modal at a time.
+  if (step !== TUTORIAL.DONE) {
+    const skip = () => dispatch(completeTutorial());
+
+    if (step === TUTORIAL.WELCOME) {
+      return (
+        <WelcomeModal
+          onBegin={() => {
+            if (location.pathname !== '/play/faith') navigate('/play/faith');
+            dispatch(setTutorialStep(TUTORIAL.SACRIFICE));
+          }}
+          onSkip={skip}
+        />
+      );
+    }
+
+    if (step === TUTORIAL.CLOSING) {
+      return <ClosingModal onDone={skip} />;
+    }
+
+    return <Hint step={step} onSkip={skip} />;
   }
 
-  if (step === TUTORIAL.CLOSING) {
-    return <ClosingModal onDone={skip} />;
+  if (showOrderIntro) {
+    return <OrderIntroModal onDone={() => dispatch(completeOrderTutorial())} />;
   }
 
-  return <Hint step={step} onSkip={skip} />;
+  if (showRivalryIntro) {
+    return <RivalryIntroModal onDone={() => dispatch(completeRivalryTutorial())} />;
+  }
+
+  return null;
 };

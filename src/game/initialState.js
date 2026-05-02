@@ -33,6 +33,18 @@ export const makeNewGame = (now = Date.now()) => ({
   // Tutorial step (0 = just started, advances as the player completes each
   // guided action). 99 = finished/skipped. Persists across prestige.
   tutorialStep: 0,
+  // One-shot tutorial flags for tabs that unlock long after the main tutorial.
+  orderTutorialDone: false,
+  rivalryTutorialDone: false,
+
+  // Rivalry: in-flight missions and recent resolutions. Lifetime stats.
+  runningRivalry: {},
+  rivalryLog: [],
+  totalRivalryWins: 0,
+  totalRivalryLosses: 0,
+  totalSoldiersLost: 0,
+  totalSpiesLost: 0,
+  totalEnginesLost: 0,
 
   lastOfflineSummary: null,
 });
@@ -48,4 +60,6 @@ export const makeNewGameWithBoons = (carryOver, now = Date.now()) => ({
   playtimeMs: carryOver.playtimeMs,
   orderUnlocked: carryOver.orderUnlocked,
   tutorialStep: carryOver.tutorialStep,
+  orderTutorialDone: carryOver.orderTutorialDone,
+  rivalryTutorialDone: carryOver.rivalryTutorialDone,
 });

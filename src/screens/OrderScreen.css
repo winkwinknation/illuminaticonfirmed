@@ -47,6 +47,7 @@
 }
 .mem--active { border-left-color: var(--gold-500); }
 .mem--passive { border-left-color: var(--knowledge); }
+.mem--roster { border-left-color: var(--hp); }
 .mem--owned { box-shadow: var(--shadow-sm), var(--gold-glow); }
 
 .mem__head { display: flex; align-items: baseline; justify-content: space-between; }
@@ -126,4 +127,14 @@
   font-size: 0.82rem;
   color: var(--text-dim);
   font-style: italic;
+}
+
+.order__roster-note {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  background: rgba(212, 175, 55, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.7rem;
+  margin-bottom: 0.4rem;
 }

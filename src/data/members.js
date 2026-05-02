@@ -40,8 +40,8 @@ export const MEMBERS = [
     unlock: [{ kind: 'totalMoneyEarned', n: 250 }],
   },
   {
-    id: 'spy',
-    name: 'Spy',
+    id: 'eavesdropper',
+    name: 'Eavesdropper',
     desc: 'Auto-runs Listen at the Tavern. Whispers paid in knowledge.',
     flavor: 'Eyes that pretend to be elsewhere.',
     cost: { money: 500, faith: 75 },
@@ -73,7 +73,7 @@ export const MEMBERS = [
     maxOwned: 10,
     behavior: { kind: 'autoMission', missionId: 'rumor_archive', minHpFraction: 0.4 },
     tier: 7,
-    unlock: [{ kind: 'totalKnowledgeEarned', n: 80 }, { kind: 'memberOwned', id: 'spy', n: 1 }],
+    unlock: [{ kind: 'totalKnowledgeEarned', n: 80 }, { kind: 'memberOwned', id: 'eavesdropper', n: 1 }],
   },
   {
     id: 'steward',
@@ -164,6 +164,47 @@ export const MEMBERS = [
     effect: { kind: 'multAll', perLevel: 0.12 },
     tier: 8,
     unlock: [{ kind: 'prestigeLevel', n: 1 }],
+  },
+
+  // ---------- War Roster ----------
+  // Consumable units committed to Rivalry missions. They have no behavior or
+  // passive effect — they are inventory the Rivals tab spends and may lose.
+  {
+    id: 'soldier',
+    name: 'Soldier',
+    desc: 'A devoted body, drilled and armed. Sent to fight rival orders.',
+    flavor: 'Faith first; fear, second; orders, always.',
+    cost: { money: 400, faith: 50 },
+    maxOwned: 100,
+    unitKind: 'soldier',
+    tier: 1,
+    unlock: [{ kind: 'orderUnlocked' }],
+  },
+  {
+    id: 'spy',
+    name: 'Spy',
+    desc: 'A face that fits any room. Sent to steal or to die unmarked.',
+    flavor: 'Loyal in inverse proportion to what is known of them.',
+    cost: { money: 700, faith: 60, knowledge: 8 },
+    maxOwned: 60,
+    unitKind: 'spy',
+    tier: 2,
+    unlock: [{ kind: 'orderUnlocked' }, { kind: 'totalKnowledgeEarned', n: 120 }],
+  },
+  {
+    id: 'war_engine',
+    name: 'War Engine',
+    desc: 'A siege apparatus blessed and bolted together. Devastating, irreplaceable.',
+    flavor: 'Some prayers are answered with a hinge and a counterweight.',
+    cost: { money: 6000, faith: 300, knowledge: 40 },
+    maxOwned: 25,
+    unitKind: 'war_engine',
+    tier: 3,
+    unlock: [
+      { kind: 'orderUnlocked' },
+      { kind: 'memberOwned', id: 'soldier', n: 5 },
+      { kind: 'totalKnowledgeEarned', n: 200 },
+    ],
   },
 ];
 

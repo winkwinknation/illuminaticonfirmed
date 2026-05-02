@@ -5,6 +5,7 @@ import { FaithScreen } from './screens/FaithScreen';
 import { KnowledgeScreen } from './screens/KnowledgeScreen';
 import { OrderScreen } from './screens/OrderScreen';
 import { PlayLayout } from './screens/PlayLayout';
+import { RivalsScreen } from './screens/RivalsScreen';
 import { SavesScreen } from './screens/SavesScreen';
 import { ShopScreen } from './screens/ShopScreen';
 import { SocietyScreen } from './screens/SocietyScreen';
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="society" element={<SocietyScreen />} />
           <Route path="shop" element={<ShopScreen />} />
           <Route path="order" element={<OrderScreen />} />
+          <Route path="rivals" element={<RivalsScreen />} />
           <Route path="knowledge" element={<KnowledgeScreen />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

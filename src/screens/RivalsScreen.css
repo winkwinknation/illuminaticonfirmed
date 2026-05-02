@@ -1,0 +1,192 @@
+.rivals { display: grid; gap: 1.2rem; }
+.rivals__head h1 {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+}
+.rivals__head p { color: var(--text-dim); font-style: italic; margin-top: 0.3rem; }
+
+.rivals__roster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.8rem;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+.rivals__roster-lbl {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.rivals__roster-pip { color: var(--text); }
+.rivals__roster-pip[data-kind='soldier'] { color: #d18b8b; }
+.rivals__roster-pip[data-kind='spy'] { color: #9bbed1; }
+.rivals__roster-pip[data-kind='war_engine'] { color: var(--gold-300); }
+.rivals__roster-stats {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+}
+.rivals__empty {
+  color: var(--text-dim);
+  font-style: italic;
+  border-left: 2px solid var(--gold-700);
+  padding-left: 0.8rem;
+}
+
+.rivals__grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 700px) { .rivals__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1200px) { .rivals__grid { grid-template-columns: repeat(3, 1fr); } }
+
+.riv {
+  background: linear-gradient(180deg, var(--navy-700), var(--navy-800));
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem 1rem;
+  display: grid;
+  gap: 0.55rem;
+  box-shadow: var(--shadow-sm);
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+.riv--conflict { border-left-color: var(--hp); }
+.riv--espionage { border-left-color: var(--knowledge); }
+.riv--locked {
+  border-style: dashed;
+  border-left-color: rgba(212, 175, 55, 0.4) !important;
+  opacity: 0.85;
+}
+
+.riv__head { display: flex; align-items: center; gap: 0.6rem; justify-content: space-between; }
+.riv__title { font-family: var(--font-display); color: var(--gold-300); font-size: 1.05rem; }
+.riv__tag {
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.riv__tag--conflict { color: var(--hp); }
+.riv__tag--espionage { color: var(--knowledge); }
+.riv__tag--locked { color: var(--text-dim); }
+
+.riv__rival {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.riv__desc { color: var(--text-dim); font-size: 0.9rem; }
+.riv__flavor { color: var(--text-dim); font-style: italic; font-size: 0.78rem; }
+
+.riv__stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+.riv__chance { color: var(--gold-300); font-weight: 700; }
+.riv__dur { color: var(--text-dim); }
+
+.riv__sub {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 0.15rem;
+}
+.riv__cost ul, .riv__rewards ul, .riv__losses ul, .riv__lock-list {
+  display: grid;
+  gap: 0.18rem;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.riv__inv { color: var(--text-dim); font-size: 0.78rem; }
+
+.riv__lock-list { color: var(--gold-300); }
+
+.riv__cd { display: grid; gap: 0.25rem; }
+.riv__cd-text {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Skirmish log ---------- */
+
+.rivlog {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem 0.7rem;
+  display: grid;
+  gap: 0.4rem;
+}
+.rivlog__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rivlog__title-bar {
+  font-family: var(--font-display);
+  color: var(--gold-300);
+  font-size: 0.9rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.rivlog__list {
+  display: grid;
+  gap: 0.35rem;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.rivlog__entry {
+  border-left: 3px solid var(--gold-700);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.25);
+}
+.rivlog__entry--win { border-left-color: var(--gold-300); }
+.rivlog__entry--loss { border-left-color: var(--hp); }
+.rivlog__head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.rivlog__title { font-size: 0.92rem; }
+.rivlog__rival {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.rivlog__close {
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  font-size: 1.2rem;
+  color: var(--text-dim);
+  border-radius: 4px;
+}
+.rivlog__close:hover { color: var(--gold-300); background: rgba(212, 175, 55, 0.1); }
+.rivlog__body {
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-variant-numeric: tabular-nums;
+}
+.rivlog__losses { color: #d18b8b; }

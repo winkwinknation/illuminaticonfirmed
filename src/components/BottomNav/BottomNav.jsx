@@ -10,6 +10,7 @@ const TABS = [
   { to: '/play/society', label: 'Society', icon: '⚜' },
   { to: '/play/shop', label: 'Shop', icon: '⛁' },
   { to: '/play/order', label: 'Order', icon: '☩' },
+  { to: '/play/rivals', label: 'Rivals', icon: '⚔' },
   { to: '/play/knowledge', label: 'Secrets', icon: '△' },
 ];
 
@@ -31,9 +32,11 @@ export const BottomNav = () => {
     <nav className="nav" aria-label="Game navigation">
       {TABS.map((t) => {
         const isOrder = t.to === '/play/order';
+        const isRivals = t.to === '/play/rivals';
         const isSecrets = t.to === '/play/knowledge';
         const showBadge = (isSecrets && knowledgeReady) || (isOrder && orderReady);
-        const lockedTab = isOrder && orderLocked;
+        // Rivals tab shares the Order knowledge gate.
+        const lockedTab = (isOrder || isRivals) && orderLocked;
         const tutorialGlow = tutTab === t.to;
 
         return (

@@ -24,6 +24,9 @@ const CostLine = ({ cost }) => (
 );
 
 const behaviorLabel = (m) => {
+  if (m.unitKind === 'soldier') return 'Roster · Soldier';
+  if (m.unitKind === 'spy') return 'Roster · Spy';
+  if (m.unitKind === 'war_engine') return 'Roster · War Engine';
   if (m.behavior?.kind === 'autoSacrifice') return 'Active · Auto-sacrifice';
   if (m.behavior?.kind === 'autoMission') return 'Active · Auto-mission';
   if (m.behavior?.kind === 'autoBuyUpgrade') return 'Active · Auto-buy';
@@ -39,7 +42,7 @@ const MemberCard = ({ member }) => {
   const afford = canAffordMember(state, member);
 
   return (
-    <article className={`mem ${member.behavior ? 'mem--active' : 'mem--passive'} ${owned ? 'mem--owned' : ''}`}>
+    <article className={`mem ${member.unitKind ? 'mem--roster' : member.behavior ? 'mem--active' : 'mem--passive'} ${owned ? 'mem--owned' : ''}`}>
       <header className="mem__head">
         <h3 className="mem__title">{member.name}</h3>
         <span className="mem__count">{owned}{member.maxOwned ? ` / ${member.maxOwned}` : ''}</span>
@@ -137,6 +140,7 @@ export const OrderScreen = () => {
   const visible = visibleMembers(state);
   const active = visible.filter((m) => m.behavior);
   const passive = visible.filter((m) => m.effect);
+  const roster = visible.filter((m) => m.unitKind);
   const next = nextLockedMember(state);
   const nextHints = next ? unlockHints(state, next) : [];
 
@@ -162,6 +166,19 @@ export const OrderScreen = () => {
           <h2 className="order__sub">Quiet Influence</h2>
           <div className="order__grid">
             {passive.map((m) => <MemberCard key={m.id} member={m} />)}
+          </div>
+        </>
+      )}
+
+      {roster.length > 0 && (
+        <>
+          <h2 className="order__sub">War Roster</h2>
+          <p className="order__roster-note">
+            Soldiers, Spies, and War Engines are <em>spent</em> on the Rivals tab. Send them on
+            campaigns of conflict or espionage — survivors return, the unfortunate do not.
+          </p>
+          <div className="order__grid">
+            {roster.map((m) => <MemberCard key={m.id} member={m} />)}
           </div>
         </>
       )}
