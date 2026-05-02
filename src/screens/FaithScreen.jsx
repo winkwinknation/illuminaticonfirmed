@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '../components/Button/Button';
-import { N, formatNumber } from '../components/Number';
+import { N, formatRate } from '../components/Number';
 import { useGame } from '../context/GameContext';
 import { sacrifice, sacrificeMember } from '../game/actions';
 import { TUTORIAL } from '../game/constants';
@@ -63,11 +63,11 @@ export const FaithScreen = () => {
           </div>
           <div className="readout">
             <span className="readout__lbl">Regen</span>
-            <span className="readout__val">{hpRegenPerSec(state).toFixed(2)}/s</span>
+            <span className="readout__val">{formatRate(hpRegenPerSec(state))}/s</span>
           </div>
           <div className="readout">
             <span className="readout__lbl">Passive faith</span>
-            <span className="readout__val">{formatNumber(passiveFaithPerSec(state), 2)}/s</span>
+            <span className="readout__val">{formatRate(passiveFaithPerSec(state))}/s</span>
           </div>
         </div>
 

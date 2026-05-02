@@ -49,4 +49,29 @@ export const LORE = {
     body:
       'When secret knowledge is sufficient, the unfinished pyramid is finished — only briefly, only in private, and only so we can take it apart again. Completion is not the goal. The goal is to be the one who decides when completion happens.',
   },
+  gilded_chain: {
+    title: 'The Gilded Chain',
+    body:
+      'A chain so finely worked it is mistaken for jewelry; so heavy it is mistaken for inheritance. Money goes around its links, knowledge slides between them. Every wearer says they could remove it any time. None of them have.',
+  },
+  unsleeping_eye: {
+    title: 'The Unsleeping Eye',
+    body:
+      'Closed eyes still gather light. The order trains attention to function without the attendance of attention — bookkeeping that does itself, listeners that listen on retainer, beads that pray themselves while the abbot dreams of nothing in particular.',
+  },
+  silver_tongue: {
+    title: 'The Silver Tongue',
+    body:
+      'A tongue minted, not born. Every assignment, sermon, or rumor passed through it returns with interest the speaker did not know they were owed. Brevity is sharpened on the back of every coin it cuts loose.',
+  },
+  aurum_solis: {
+    title: 'Aurum Solis',
+    body:
+      '"The Gold of the Sun." A discipline older than the order it now finances: distil what is worthy and discard what was needed only to cradle it. Every ascension is a furnace; what comes out is denser than what went in.',
+  },
+  bloodline: {
+    title: 'The Bloodline',
+    body:
+      'Not a family. A pattern. The order does not breed for resemblance, but resemblance keeps appearing — same gestures, same silences, same way of looking at a room as if it were already decided. The children inherit the work and never the name.',
+  },
 };

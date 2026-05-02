@@ -64,18 +64,80 @@ const boonMult = (state, kinds) => {
   for (const b of Object.values(BOONS_BY_ID)) {
     const owned = boonOwned(state, b.id);
     if (!owned) continue;
-    if (b.effect.kind === 'multAll' && (kinds.faith || kinds.money || kinds.knowledge)) {
+    const k = b.effect.kind;
+    if (k === 'multAll' && (kinds.faith || kinds.money || kinds.knowledge)) {
       mult *= 1 + b.effect.perLevel * owned;
-    } else if (b.effect.kind === 'multMoneyAndFaith' && (kinds.faith || kinds.money)) {
+    } else if (k === 'multMoneyAndFaith' && (kinds.faith || kinds.money)) {
       mult *= 1 + b.effect.perLevel * owned;
-    } else if (b.effect.kind === 'multAllFaith' && kinds.faith) {
+    } else if (k === 'multMoneyAndKnowledge' && kinds.money) {
       mult *= 1 + b.effect.perLevel * owned;
-    } else if (b.effect.kind === 'multAllMoney' && kinds.money) {
+    } else if (k === 'multMoneyAndKnowledge' && kinds.knowledge) {
+      mult *= 1 + (b.effect.knowledgePerLevel ?? b.effect.perLevel) * owned;
+    } else if (k === 'multAllFaith' && kinds.faith) {
       mult *= 1 + b.effect.perLevel * owned;
-    } else if (b.effect.kind === 'multAllKnowledge' && kinds.knowledge) {
+    } else if (k === 'multAllMoney' && kinds.money) {
       mult *= 1 + b.effect.perLevel * owned;
-    } else if (b.effect.kind === 'multAllMul') {
+    } else if (k === 'multAllKnowledge' && kinds.knowledge) {
+      mult *= 1 + b.effect.perLevel * owned;
+    } else if (k === 'multAllMul') {
       mult *= Math.pow(b.effect.perLevel, owned);
+    }
+  }
+  return mult;
+};
+
+// Passive-stream-only multiplier ("Unsleeping Eye"), applied on top of boonMult.
+const passiveBoonMult = (state) => {
+  let mult = 1;
+  for (const b of Object.values(BOONS_BY_ID)) {
+    const owned = boonOwned(state, b.id);
+    if (owned && b.effect.kind === 'multPassive') {
+      mult *= 1 + b.effect.perLevel * owned;
+    }
+  }
+  return mult;
+};
+
+// Mission-reward multiplier ("Silver Tongue") — stacks with member multAllMissionRewards.
+const missionRewardBoonMult = (state) => {
+  let mult = 1;
+  for (const b of Object.values(BOONS_BY_ID)) {
+    const owned = boonOwned(state, b.id);
+    if (owned && b.effect.kind === 'multMissionReward') {
+      mult *= 1 + b.effect.perLevel * owned;
+    }
+  }
+  return mult;
+};
+
+// Multiplicative kind→multiplier from upgrades (e.g. Devotion category).
+// `kind` is the resource scope: 'faith' | 'money' | 'knowledge' | 'all' | 'mission' | 'passive'.
+const upgradeKindMul = (state, kind) => {
+  let mult = 1;
+  for (const u of Object.values(UPGRADES_BY_ID)) {
+    const owned = upgradeOwned(state, u.id);
+    if (!owned) continue;
+    const k = u.effect.kind;
+    const matchesAll = k === 'multAllMul' && (kind === 'faith' || kind === 'money' || kind === 'knowledge');
+    const matchesFaith = k === 'multAllFaithMul' && kind === 'faith';
+    const matchesMoney = k === 'multAllMoneyMul' && kind === 'money';
+    const matchesKnowledge = k === 'multAllKnowledgeMul' && kind === 'knowledge';
+    const matchesMission = k === 'multMissionRewardMul' && kind === 'mission';
+    const matchesPassive = k === 'multPassiveAll' && kind === 'passive';
+    if (matchesAll || matchesFaith || matchesMoney || matchesKnowledge || matchesMission || matchesPassive) {
+      mult *= Math.pow(u.effect.perLevel, owned);
+    }
+  }
+  return mult;
+};
+
+// SK gain multiplier on prestige ("Aurum Solis").
+export const skGainMultiplier = (state) => {
+  let mult = 1;
+  for (const b of Object.values(BOONS_BY_ID)) {
+    const owned = boonOwned(state, b.id);
+    if (owned && b.effect.kind === 'skGainMul') {
+      mult *= 1 + b.effect.perLevel * owned;
     }
   }
   return mult;
@@ -136,7 +198,8 @@ export const sacrificeFaithGain = (state) => {
   );
   const boon = boonMult(state, { faith: true });
   const memberMult = memberKindMult(state, { faith: true });
-  return Math.max(1, Math.floor((baseFaith + flatBonus) * mul * boon * memberMult));
+  const devotion = upgradeKindMul(state, 'faith');
+  return Math.max(1, Math.floor((baseFaith + flatBonus) * mul * boon * memberMult * devotion));
 };
 
 export const sacrificeHpCost = () => SACRIFICE_HP_COST;
@@ -163,7 +226,10 @@ export const missionDurationMs = (state, mission) => {
   return Math.max(500, Math.floor(mission.durationMs * mul));
 };
 
-const missionRewardMult = (state) => 1 + sumMemberEffect(state, 'multAllMissionRewards');
+const missionRewardMult = (state) =>
+  (1 + sumMemberEffect(state, 'multAllMissionRewards')) *
+  missionRewardBoonMult(state) *
+  upgradeKindMul(state, 'mission');
 
 export const missionRewardMoney = (state, mission) => {
   const base = mission.reward.money || 0;
@@ -174,7 +240,11 @@ export const missionRewardMoney = (state, mission) => {
     (u, n) => u.effect.perLevel * n
   );
   return Math.floor(
-    base * (1 + cat) * boonMult(state, { money: true }) * memberKindMult(state, { money: true }) * missionRewardMult(state)
+    base * (1 + cat) *
+    boonMult(state, { money: true }) *
+    memberKindMult(state, { money: true }) *
+    missionRewardMult(state) *
+    upgradeKindMul(state, 'money')
   );
 };
 
@@ -189,11 +259,11 @@ export const missionRewardKnowledge = (state, mission) => {
   return Math.max(
     1,
     Math.floor(
-      base *
-        (1 + cat) *
-        boonMult(state, { knowledge: true }) *
-        memberKindMult(state, { knowledge: true }) *
-        missionRewardMult(state)
+      base * (1 + cat) *
+      boonMult(state, { knowledge: true }) *
+      memberKindMult(state, { knowledge: true }) *
+      missionRewardMult(state) *
+      upgradeKindMul(state, 'knowledge')
     )
   );
 };
@@ -202,7 +272,11 @@ export const missionRewardFaith = (state, mission) => {
   const base = mission.reward.faith || 0;
   if (!base) return 0;
   return Math.floor(
-    base * boonMult(state, { faith: true }) * memberKindMult(state, { faith: true }) * missionRewardMult(state)
+    base *
+    boonMult(state, { faith: true }) *
+    memberKindMult(state, { faith: true }) *
+    missionRewardMult(state) *
+    upgradeKindMul(state, 'faith')
   );
 };
 
@@ -223,18 +297,33 @@ const passiveAll = (state) =>
 
 export const passiveFaithPerSec = (state) => {
   const base = sumUpgradeEffect(state, (u) => u.effect.kind === 'addPassiveFaith', (u, n) => u.effect.perLevel * n);
-  return (base + passiveAll(state)) * boonMult(state, { faith: true }) * memberKindMult(state, { faith: true });
+  return (base + passiveAll(state)) *
+    boonMult(state, { faith: true }) *
+    memberKindMult(state, { faith: true }) *
+    passiveBoonMult(state) *
+    upgradeKindMul(state, 'passive') *
+    upgradeKindMul(state, 'faith');
 };
 
 export const passiveMoneyPerSec = (state) => {
   const base = sumUpgradeEffect(state, (u) => u.effect.kind === 'addPassiveMoney', (u, n) => u.effect.perLevel * n);
-  return (base + passiveAll(state)) * boonMult(state, { money: true }) * memberKindMult(state, { money: true });
+  return (base + passiveAll(state)) *
+    boonMult(state, { money: true }) *
+    memberKindMult(state, { money: true }) *
+    passiveBoonMult(state) *
+    upgradeKindMul(state, 'passive') *
+    upgradeKindMul(state, 'money');
 };
 
 export const passiveKnowledgePerSec = (state) => {
   const fromUpgrades = sumUpgradeEffect(state, (u) => u.effect.kind === 'addPassiveKnowledge', (u, n) => u.effect.perLevel * n);
   const fromMembers = sumMemberEffect(state, 'addPassiveKnowledge');
-  return (fromUpgrades + fromMembers + passiveAll(state)) * boonMult(state, { knowledge: true }) * memberKindMult(state, { knowledge: true });
+  return (fromUpgrades + fromMembers + passiveAll(state)) *
+    boonMult(state, { knowledge: true }) *
+    memberKindMult(state, { knowledge: true }) *
+    passiveBoonMult(state) *
+    upgradeKindMul(state, 'passive') *
+    upgradeKindMul(state, 'knowledge');
 };
 
 // ---------- Costs ----------
@@ -425,10 +514,16 @@ export const canPrestige = (state) =>
   state.knowledge >= currentPrestigeKnowledgeThreshold(state) &&
   skGainOnPrestige(state) > 0;
 
-export const skGainOnPrestige = (state) => {
+// Unmultiplied SK owed since last prestige. totalSkEarned tracks this raw
+// quantity so future prestiges still compute the right delta against money
+// totals — the Aurum Solis multiplier is applied at award time, not stored.
+export const rawSkGainOnPrestige = (state) => {
   const total = skFromTotalMoney(state.totalMoneyEarned);
   return Math.max(0, total - state.totalSkEarned);
 };
+
+export const skGainOnPrestige = (state) =>
+  Math.floor(rawSkGainOnPrestige(state) * skGainMultiplier(state));
 
 export const boonCost = (state, boon) => boonCostAt(boon, boonOwned(state, boon.id));
 

@@ -4,6 +4,8 @@
   "private": true,
   "homepage": "https://winkwinknation.github.io/illuminaticonfirmed",
   "dependencies": {
+    "@antimatter-dimensions/notations": "^3.2.0",
+    "break_infinity.js": "^2.2.0",
     "gh-pages": "^5.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

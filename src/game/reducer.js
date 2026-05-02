@@ -59,6 +59,7 @@ import {
   passiveKnowledgePerSec,
   passiveMoneyPerSec,
   hpRegenPerSec,
+  rawSkGainOnPrestige,
   revealedBoonCount,
   sacrificeFaithGain,
   sacrificeHpCost,
@@ -452,10 +453,11 @@ export const reducer = (state, action) => {
     case PRESTIGE: {
       if (!canPrestige(state)) return state;
       const skGained = skGainOnPrestige(state);
+      const rawSk = rawSkGainOnPrestige(state);
       const carryOver = {
         prestigeLevel: state.prestigeLevel + 1,
         secretKnowledge: state.secretKnowledge + skGained,
-        totalSkEarned: state.totalSkEarned + skGained,
+        totalSkEarned: state.totalSkEarned + rawSk,
         boons: state.boons,
         unlockedLore: state.unlockedLore,
         createdAt: state.createdAt,

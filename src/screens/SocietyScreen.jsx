@@ -61,7 +61,7 @@ const MissionCard = ({ mission, glow }) => {
       {running ? (
         <div className="mission__cd">
           <ProgressBar value={total - remaining} max={total} color="var(--gold-500)" height={8} />
-          <span className="mission__cd-text">{(remaining / 1000).toFixed(1)}s</span>
+          <span className="mission__cd-text">{(remaining / 1000).toFixed(remaining < 10000 ? 1 : 0)}s</span>
         </div>
       ) : (
         <Button

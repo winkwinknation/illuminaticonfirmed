@@ -74,7 +74,7 @@ export const KnowledgeScreen = () => {
 
         <div className="kn__cta">
           <div className="kn__sk">
-            Prestige tier: <strong>{state.prestigeLevel}</strong> · SK held: <strong>{state.secretKnowledge}</strong>
+            Prestige tier: <strong>{state.prestigeLevel}</strong> · SK held: <strong><N value={state.secretKnowledge} placesUnder1000={0} /></strong>
           </div>
           <Button
             variant="primary"
@@ -102,7 +102,7 @@ export const KnowledgeScreen = () => {
           disabled={!canReveal}
           onClick={onReveal}
         >
-          {unrevealedIds.length === 0 ? 'All revealed' : `Reveal a Truth · ${revealCost} SK`}
+          {unrevealedIds.length === 0 ? 'All revealed' : <>Reveal a Truth · <N value={revealCost} placesUnder1000={0} /> SK</>}
         </Button>
       </div>
 
@@ -129,11 +129,11 @@ export const KnowledgeScreen = () => {
             <article key={b.id} className="boon boon--owned">
               <header className="boon__head">
                 <h3 className="boon__title">{b.name}</h3>
-                <span className="boon__owned">{owned}{b.maxOwned ? `/${b.maxOwned}` : ''}</span>
+                <span className="boon__owned">×{owned}{b.maxOwned ? `/${b.maxOwned}` : ''}</span>
               </header>
               <p className="boon__desc">{b.desc}</p>
               <div className="boon__row">
-                {!maxed && <span className="boon__cost">{cost} SK</span>}
+                {!maxed && <span className="boon__cost"><N value={cost} placesUnder1000={0} /> SK</span>}
                 <div className="boon__actions">
                   <Button variant="ghost" size="sm" onClick={() => setLoreOpen(b.loreId)}>Lore</Button>
                   <Button

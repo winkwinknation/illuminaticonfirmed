@@ -46,7 +46,7 @@ export const StatusBar = () => {
         {state.secretKnowledge > 0 && (
           <div className="status__r" data-kind="sk" title="Secret Knowledge">
             <span className="status__icon">◉</span>
-            <span className="status__val">{state.secretKnowledge}</span>
+            <span className="status__val"><N value={state.secretKnowledge} placesUnder1000={0} /></span>
             <span className="status__lbl">SK</span>
           </div>
         )}
