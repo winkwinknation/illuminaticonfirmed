@@ -102,7 +102,7 @@ const OrderLockedView = () => {
         <div className="order__lock-progress">
           <div className="order__lock-row">
             <span>Knowledge required</span>
-            <span><N value={state.knowledge || 0} /> / {cost}</span>
+            <span><N value={state.knowledge || 0} placesUnder1000={1} /> / <N value={cost} placesUnder1000={0} /></span>
           </div>
           <ProgressBar
             value={Math.min(state.knowledge || 0, cost)}
@@ -119,7 +119,11 @@ const OrderLockedView = () => {
             disabled={!can}
             onClick={() => dispatch(unlockOrder())}
           >
-            {can ? `Spend ${cost} knowledge → Inaugurate` : `Need ${need} more knowledge`}
+            {can ? (
+              <>Spend <N value={cost} placesUnder1000={0} /> knowledge → Inaugurate</>
+            ) : (
+              <>Need <N value={need} placesUnder1000={1} /> more knowledge</>
+            )}
           </Button>
         </div>
 

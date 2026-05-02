@@ -24,7 +24,7 @@ const SlotCard = ({ index, summary, onLoad, onNew, onDelete, onExport, onImport 
           <div><dt>Faith</dt><dd>{formatNumber(summary.faith)}</dd></div>
           <div><dt>Money</dt><dd>{formatNumber(summary.money)}</dd></div>
           <div><dt>Knowledge</dt><dd>{formatNumber(summary.knowledge)}</dd></div>
-          <div><dt>SK</dt><dd>{summary.secretKnowledge}</dd></div>
+          <div><dt>SK</dt><dd>{formatNumber(summary.secretKnowledge, 2, 0)}</dd></div>
           <div><dt>Played</dt><dd>{formatDuration(summary.playtimeMs)}</dd></div>
           <div><dt>Saved</dt><dd>{summary.savedAt ? new Date(summary.savedAt).toLocaleString() : '—'}</dd></div>
         </dl>
