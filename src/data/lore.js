@@ -74,4 +74,14 @@ export const LORE = {
     body:
       'Not a family. A pattern. The order does not breed for resemblance, but resemblance keeps appearing — same gestures, same silences, same way of looking at a room as if it were already decided. The children inherit the work and never the name.',
   },
+  blinky_kingdom: {
+    title: 'The Kingdom of Miscellania',
+    body:
+      'Blinky logged in on a Tuesday in 2007 and never properly logged out. Where most read "Manage Thy Kingdom" as a sub-quest, he heard a confession — that any kingdom run by an absent monarch returns goods to him with interest, and that this is also a description of the order itself. His lodge, "Kingdom," convenes in the third world\'s Edgeville bank, in a circle by the fountain. Meetings are called in trade chat: "Selling fish." A stranger who answers "Buying lobs" is in session. They are AFK, three accounts deep, and they are listening. Their highest rite is the Party Hat — six colors, six grades; the white reserved for the Grand Voyeur, who has not spoken in a decade and whose drop has therefore appreciated accordingly.',
+  },
+  emmi_court: {
+    title: 'The Latex Court of Emmi',
+    body:
+      'Emmi was crowned in the dark ages and has not yet been told the lights came on. Her court receives in a vaulted chamber lined entirely in black latex — wall, ceiling, gloss renewed monthly by the youngest initiate, who treats this as both penance and audition. Her court stands; only Emmi sits, and what she sits on is a contract older than the throne. Members are addressed by garment: Glove, Collar, Hood. The Vampire Queen does not sign; she breathes on a page and the page sets. Initiation is a bow, a vow, and a pint donated voluntarily and very gladly. The Latex Court does not believe in vulgarity, only in pressure — applied evenly, removed slowly. Their ledgers list who owes Emmi. Their ledgers do not list who Emmi owes. That, they will explain, is the contract.',
+  },
 };

@@ -156,6 +156,24 @@ export const BOONS = [
     effect: { kind: 'multAllMul', perLevel: 2.0 },
     loreId: 'bloodline',
   },
+  {
+    id: 'blinky_kingdom',
+    name: "Blinky's Kingdom",
+    desc: '+40% offline cap, per level.',
+    cost: 8,
+    costGrowth: 1.7,
+    effect: { kind: 'addOfflineCap', perLevel: 0.40 },
+    loreId: 'blinky_kingdom',
+  },
+  {
+    id: 'emmi_court',
+    name: 'The Latex Court of Emmi',
+    desc: '+25% max HP, per level.',
+    cost: 6,
+    costGrowth: 1.7,
+    effect: { kind: 'addMaxHpPct', perLevel: 0.25 },
+    loreId: 'emmi_court',
+  },
 ];
 
 export const BOONS_BY_ID = Object.fromEntries(BOONS.map((b) => [b.id, b]));
